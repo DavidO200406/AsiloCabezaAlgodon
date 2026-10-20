@@ -1,0 +1,233 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Detalle de solicitud médica - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado">
+
+    <div>
+
+        <span class="etiqueta-seccion">
+            GESTIÓN MÉDICA
+        </span>
+
+        <h2>Detalle de solicitud médica</h2>
+
+        <p>
+            Información completa de la solicitud registrada.
+        </p>
+
+    </div>
+
+    <a href="{{ url_for('solicitudes_medicas') }}" class="btn-secundario">
+        ← Volver a solicitudes
+    </a>
+
+</div>
+
+
+<div class="panel-contenido detalle-residente">
+
+    <!-- ENCABEZADO -->
+
+    <div class="detalle-encabezado">
+
+        <div class="detalle-avatar">
+            SM
+        </div>
+
+        <div>
+
+            <h3>
+                Solicitud #{{ solicitud.id_solicitud }}
+            </h3>
+
+            <p>
+                {{ solicitud.residente_nombres }}
+                {{ solicitud.residente_apellidos }}
+            </p>
+
+        </div>
+
+
+        {% if solicitud.estado == "Pendiente" %}
+
+        <span class="estado-pendiente">
+            {{ solicitud.estado }}
+        </span>
+
+        {% else %}
+
+        <span class="estado-activo">
+            {{ solicitud.estado }}
+        </span>
+
+        {% endif %}
+
+    </div>
+
+
+    <!-- INFORMACIÓN GENERAL -->
+
+    <div class="detalle-seccion">
+
+        <h3>
+            Información de la solicitud
+        </h3>
+
+
+        <div class="detalle-grid">
+
+            <div class="detalle-campo">
+
+                <span>
+                    Residente
+                </span>
+
+                <strong>
+                    {{ solicitud.residente_nombres }}
+                    {{ solicitud.residente_apellidos }}
+                </strong>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span>
+                    Fecha de solicitud
+                </span>
+
+                <strong>
+                    {{ solicitud.fecha_solicitud }}
+                </strong>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span>
+                    Médico solicitado
+                </span>
+
+                <strong>
+
+                    {% if solicitud.medico_nombres %}
+
+                    {{ solicitud.medico_nombres }}
+                    {{ solicitud.medico_apellidos }}
+
+                    {% else %}
+
+                    No asignado
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+
+            <div class="detalle-campo">
+
+                <span>
+                    Enfermero relacionado
+                </span>
+
+                <strong>
+
+                    {% if solicitud.enfermero_nombres %}
+
+                    {{ solicitud.enfermero_nombres }}
+                    {{ solicitud.enfermero_apellidos }}
+
+                    {% else %}
+
+                    No asignado
+
+                    {% endif %}
+
+                </strong>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- MOTIVO -->
+
+    <div class="detalle-seccion">
+
+        <h3>
+            Motivo
+        </h3>
+
+        <div class="detalle-texto">
+
+            <div>
+
+                <span>
+                    Motivo de la solicitud
+                </span>
+
+                <p>
+                    {{ solicitud.motivo }}
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- OBSERVACIONES -->
+
+    <div class="detalle-seccion">
+
+        <h3>
+            Observaciones
+        </h3>
+
+        <div class="detalle-texto">
+
+            <div>
+
+                <span>
+                    Observaciones registradas
+                </span>
+
+                <p>
+                    {{ solicitud.observaciones or 'Sin observaciones registradas.' }}
+                </p>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- ACCIONES -->
+
+    <div class="detalle-acciones">
+
+        <a href="{{ url_for('solicitudes_medicas') }}" class="btn-secundario">
+            Volver al listado
+        </a>
+
+        <a href="{{ url_for('editar_solicitud_medica', id_solicitud=solicitud.id_solicitud) }}" class="btn-principal">
+            Editar solicitud
+        </a>
+
+    </div>
+
+</div>
+
+{% endblock %}

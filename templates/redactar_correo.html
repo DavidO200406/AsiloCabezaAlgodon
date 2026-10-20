@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Redactar correo - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado">
+    <div>
+        <span class="etiqueta-seccion">COMUNICACIÓN</span>
+        <h2>Redactar correo</h2>
+        <p>Prepara un aviso para el familiar seleccionado.</p>
+    </div>
+
+    <a href="{{ url_for('familiares') }}" class="btn-secundario">
+        Volver a familiares
+    </a>
+</div>
+
+{% if error %}
+<div class="mensaje-error">
+    {{ error }}
+</div>
+{% endif %}
+
+<div class="panel-contenido">
+
+    <div class="panel-titulo">
+        <div>
+            <h3>Destinatario</h3>
+            <p>
+                {{ familiar.nombres }} {{ familiar.apellidos }}
+            </p>
+        </div>
+    </div>
+
+    <div class="form-grid">
+        <div class="campo">
+            <label for="correo_destinatario">Correo electrónico</label>
+            <input type="email" id="correo_destinatario" value="{{ familiar.correo }}" readonly>
+        </div>
+
+        <div class="campo">
+            <label for="residente_relacionado">Residente relacionado</label>
+            <input type="text" id="residente_relacionado"
+                value="{{ familiar.nombre_residente }} {{ familiar.apellido_residente }}" readonly>
+        </div>
+    </div>
+
+    <form method="POST" action="{{ url_for(
+            'enviar_correo_familiar',
+            id_familiar=familiar.id_familiar
+        ) }}">
+
+        <div class="campo">
+            <label for="asunto">Asunto *</label>
+            <input type="text" id="asunto" name="asunto" maxlength="150" placeholder="Escribe el asunto del correo"
+                required>
+        </div>
+
+        <div class="campo">
+            <label for="mensaje">Mensaje *</label>
+            <textarea id="mensaje" name="mensaje" rows="7" maxlength="5000"
+                placeholder="Escribe el mensaje para el familiar..." required></textarea>
+        </div>
+
+        <div class="form-acciones">
+            <a href="{{ url_for('familiares') }}" class="btn-secundario">
+                Cancelar
+            </a>
+
+            <button type="submit" class="btn-principal">
+                Confirmar envío
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+
+{% block titulo %}Nuevo examen - Laboratorio{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado laboratorio-encabezado">
+    <div>
+        <span class="etiqueta-seccion">ÁREA MÉDICA</span>
+        <h2>Registrar examen</h2>
+        <p>Ingresa la información del nuevo examen de laboratorio.</p>
+    </div>
+</div>
+
+<div class="laboratorio-formulario-panel">
+
+    <div class="laboratorio-formulario-titulo">
+        <div class="laboratorio-formulario-icono">+</div>
+        <div>
+            <h3>Información del examen</h3>
+            <p>Completa los datos solicitados para agregar un examen al catálogo.</p>
+        </div>
+    </div>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+    {% if mensajes %}
+    {% for categoria, mensaje in mensajes %}
+    <div class="laboratorio-mensaje {{ categoria }}">
+        {{ mensaje }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <form method="POST" action="{{ url_for('nuevo_examen_laboratorio') }}" class="laboratorio-formulario">
+
+        <div class="laboratorio-campo-formulario">
+            <label for="nombre">Nombre del examen <span>*</span></label>
+            <input type="text" id="nombre" name="nombre" maxlength="100" required
+                placeholder="Ej. Prueba de función renal">
+            <small>Escribe el nombre con el que aparecerá en el catálogo.</small>
+        </div>
+
+        <div class="laboratorio-campo-formulario">
+            <label for="descripcion">Descripción</label>
+            <textarea id="descripcion" name="descripcion" maxlength="255" rows="4"
+                placeholder="Describe brevemente el examen"></textarea>
+            <small>Este campo es opcional.</small>
+        </div>
+
+        <div class="laboratorio-formulario-fila">
+
+            <div class="laboratorio-campo-formulario">
+                <label for="precio">Precio en quetzales (Q) <span>*</span></label>
+                <div class="laboratorio-input-precio">
+                    <span>Q</span>
+                    <input type="number" id="precio" name="precio" min="0" max="99999999.99" step="0.01" required
+                        placeholder="0.00">
+                </div>
+            </div>
+
+            <div class="laboratorio-campo-formulario">
+                <label for="estado">Estado <span>*</span></label>
+                <select id="estado" name="estado" required>
+                    <option value="1">Activo</option>
+                    <option value="0">Inactivo</option>
+                </select>
+                <small>Los exámenes inactivos se conservan en el catálogo.</small>
+            </div>
+
+        </div>
+
+        <div class="laboratorio-formulario-nota">
+            <span>*</span> Los campos marcados son obligatorios.
+        </div>
+
+        <div class="laboratorio-formulario-acciones">
+            <a href="{{ url_for('laboratorio') }}" class="laboratorio-btn-cancelar">
+                Cancelar
+            </a>
+
+            <button type="submit" class="laboratorio-btn-guardar">
+                Guardar examen
+            </button>
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

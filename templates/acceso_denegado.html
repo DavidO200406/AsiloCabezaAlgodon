@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Acceso denegado - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="acceso-denegado">
+
+    <div class="acceso-icono">
+        !
+    </div>
+
+    <h2>Acceso denegado</h2>
+
+    <p>
+        No tienes permisos para acceder a este módulo.
+    </p>
+
+    <p class="rol-actual">
+        Rol actual:
+        <strong>{{ rol_usuario }}</strong>
+    </p>
+
+    <a href="{{ url_for('inicio') }}" class="btn-principal">
+        Volver al panel principal
+    </a>
+
+</div>
+
+{% endblock %}

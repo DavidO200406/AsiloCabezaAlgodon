@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Registrar {{ 'médico' if tipo == 'medico' else 'enfermero' }} - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="personal-pagina">
+
+    <div class="personal-encabezado">
+        <div>
+            <h1>Personal médico</h1>
+            <p>Consulta y administración de médicos y enfermeros del asilo.</p>
+        </div>
+
+        <div class="personal-acciones">
+            <a href="{{ url_for('nuevo_personal', tipo='medico') }}" class="personal-btn guardar">
+                + Registrar médico
+            </a>
+
+            <a href="{{ url_for('nuevo_personal', tipo='enfermero') }}" class="personal-btn secundario">
+                + Registrar enfermero
+            </a>
+        </div>
+    </div>
+
+    <section class="personal-seccion">
+        {% if error %}
+        <div class="personal-error" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('nuevo_personal', tipo=tipo) }}" class="personal-formulario">
+
+            <div class="personal-campos">
+
+                <div class="personal-campo">
+                    <label for="nombres">Nombres *</label>
+                    <input type="text" id="nombres" name="nombres" maxlength="100" required
+                        value="{{ request.form.get('nombres', '') }}">
+                </div>
+
+                <div class="personal-campo">
+                    <label for="apellidos">Apellidos *</label>
+                    <input type="text" id="apellidos" name="apellidos" maxlength="100" required
+                        value="{{ request.form.get('apellidos', '') }}">
+                </div>
+
+                {% if tipo == 'medico' %}
+                <div class="personal-campo">
+                    <label for="colegiado">Número de colegiado</label>
+                    <input type="text" id="colegiado" name="colegiado" maxlength="50"
+                        value="{{ request.form.get('colegiado', '') }}">
+                </div>
+
+                <div class="personal-campo">
+                    <label for="id_especialidad">Especialidad *</label>
+                    <select id="id_especialidad" name="id_especialidad" required>
+                        <option value="">Selecciona una especialidad</option>
+                        {% for especialidad in especialidades %}
+                        <option value="{{ especialidad.id_especialidad }}" {% if request.form.get('id_especialidad', ''
+                            )==especialidad.id_especialidad|string %}selected{% endif %}>
+                            {{ especialidad.nombre }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+                {% endif %}
+
+                <div class="personal-campo">
+                    <label for="telefono">Teléfono</label>
+                    <input type="tel" id="telefono" name="telefono" maxlength="20"
+                        value="{{ request.form.get('telefono', '') }}">
+                </div>
+
+                <div class="personal-campo">
+                    <label for="correo">Correo electrónico</label>
+                    <input type="email" id="correo" name="correo" maxlength="100"
+                        value="{{ request.form.get('correo', '') }}">
+                </div>
+
+            </div>
+
+            <p class="personal-ayuda">Los campos marcados con * son obligatorios.</p>
+
+            <div class="personal-form-acciones">
+                <a href="{{ url_for('personal') }}" class="personal-btn cancelar">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="personal-btn guardar">
+                    Guardar registro
+                </button>
+            </div>
+
+        </form>
+    </section>
+
+</div>
+
+{% endblock %}

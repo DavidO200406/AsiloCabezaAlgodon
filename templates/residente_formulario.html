@@ -1,0 +1,187 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Nuevo residente - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<!-- ENCABEZADO -->
+<div class="pagina-encabezado residente-formulario-encabezado">
+    <div>
+        <span class="etiqueta-seccion">GESTIÓN</span>
+        <h2>Registrar residente</h2>
+        <p>Ingresa los datos del residente y de su familiar responsable.</p>
+    </div>
+
+    <a href="{{ url_for('residentes') }}" class="btn-secundario">
+        Volver al listado
+    </a>
+</div>
+
+<div class="residente-formulario-pagina">
+    <div class="panel-contenido">
+
+        {% if error %}
+        <div class="residente-error">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" class="form-residente">
+
+            <!-- DATOS DEL RESIDENTE -->
+            <div class="panel-titulo">
+                <div>
+                    <h3>Datos del residente</h3>
+                    <p>Información general y médica.</p>
+                </div>
+            </div>
+
+            <div class="form-grid">
+
+                <div class="campo">
+                    <label for="nombres">Nombres *</label>
+                    <input type="text" id="nombres" name="nombres" value="{{ request.form.get('nombres', '') }}"
+                        required>
+                </div>
+
+                <div class="campo">
+                    <label for="apellidos">Apellidos *</label>
+                    <input type="text" id="apellidos" name="apellidos" value="{{ request.form.get('apellidos', '') }}"
+                        required>
+                </div>
+
+                <div class="campo">
+                    <label for="fecha_nacimiento">Fecha de nacimiento *</label>
+                    <input type="date" id="fecha_nacimiento" name="fecha_nacimiento"
+                        value="{{ request.form.get('fecha_nacimiento', '') }}" required>
+                </div>
+
+                <div class="campo">
+                    <label for="fecha_ingreso">Fecha de ingreso *</label>
+                    <input type="date" id="fecha_ingreso" name="fecha_ingreso"
+                        value="{{ request.form.get('fecha_ingreso', '') }}" required>
+                </div>
+
+                <div class="campo">
+                    <label for="genero">Género</label>
+                    <select id="genero" name="genero">
+                        <option value="">Seleccione</option>
+                        <option value="Masculino" {% if request.form.get('genero')=='Masculino' %}selected{% endif %}>
+                            Masculino
+                        </option>
+                        <option value="Femenino" {% if request.form.get('genero')=='Femenino' %}selected{% endif %}>
+                            Femenino
+                        </option>
+                    </select>
+                </div>
+
+                <div class="campo campo-completo">
+                    <label for="motivo_ingreso">Motivo de ingreso</label>
+                    <textarea id="motivo_ingreso" name="motivo_ingreso"
+                        rows="2">{{ request.form.get('motivo_ingreso', '') }}</textarea>
+                </div>
+
+                <div class="campo campo-completo">
+                    <label for="diagnostico_ingreso">Diagnóstico de ingreso</label>
+                    <textarea id="diagnostico_ingreso" name="diagnostico_ingreso"
+                        rows="2">{{ request.form.get('diagnostico_ingreso', '') }}</textarea>
+                </div>
+
+                <div class="campo campo-completo">
+                    <label for="medicamentos_cajon">Medicamentos de cajón</label>
+                    <textarea id="medicamentos_cajon" name="medicamentos_cajon"
+                        rows="2">{{ request.form.get('medicamentos_cajon', '') }}</textarea>
+                </div>
+
+                <div class="campo campo-completo">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" name="observaciones"
+                        rows="2">{{ request.form.get('observaciones', '') }}</textarea>
+                </div>
+
+            </div>
+
+            <!-- DATOS DEL FAMILIAR -->
+            <div class="panel-titulo residente-subtitulo">
+                <div>
+                    <h3>Información del familiar</h3>
+                    <p>Datos de contacto del familiar o responsable.</p>
+                </div>
+            </div>
+
+            <div class="form-grid">
+
+                <div class="campo">
+                    <label for="familiar_nombres">Nombres del familiar *</label>
+                    <input type="text" id="familiar_nombres" name="familiar_nombres"
+                        value="{{ request.form.get('familiar_nombres', '') }}" required>
+                </div>
+
+                <div class="campo">
+                    <label for="familiar_apellidos">Apellidos del familiar *</label>
+                    <input type="text" id="familiar_apellidos" name="familiar_apellidos"
+                        value="{{ request.form.get('familiar_apellidos', '') }}" required>
+                </div>
+
+                <div class="campo">
+                    <label for="parentesco">Parentesco *</label>
+                    <select id="parentesco" name="parentesco" required>
+                        <option value="">Seleccione</option>
+                        {% for opcion in ['Hijo/a', 'Esposo/a', 'Hermano/a', 'Nieto/a', 'Sobrino/a', 'Otro'] %}
+                        <option value="{{ opcion }}" {% if request.form.get('parentesco')==opcion %}selected{% endif %}>
+                            {{ opcion }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="campo">
+                    <label for="familiar_telefono">Teléfono</label>
+                    <input type="tel" id="familiar_telefono" name="familiar_telefono"
+                        value="{{ request.form.get('familiar_telefono', '') }}">
+                </div>
+
+                <div class="campo">
+                    <label for="familiar_correo">Correo electrónico</label>
+                    <input type="email" id="familiar_correo" name="familiar_correo" placeholder="ejemplo@correo.com"
+                        value="{{ request.form.get('familiar_correo', '') }}">
+                </div>
+
+                <div class="campo campo-completo">
+                    <label for="familiar_direccion">Dirección</label>
+                    <textarea id="familiar_direccion" name="familiar_direccion"
+                        rows="2">{{ request.form.get('familiar_direccion', '') }}</textarea>
+                </div>
+
+                <div class="campo campo-completo campo-responsable">
+                    <label>
+                        <input type="checkbox" name="responsable_pago" value="1" {% if
+                            request.form.get('responsable_pago') %}checked{% endif %}>
+                        Es responsable de pago del residente
+                    </label>
+                </div>
+
+            </div>
+
+            <!-- BOTONES -->
+            <div class="form-acciones">
+                <a href="{{ url_for('residentes') }}" class="btn-secundario">
+                    Cancelar
+                </a>
+
+                <button type="reset" class="btn-secundario">
+                    Limpiar formulario
+                </button>
+
+                <button type="submit" class="btn-principal">
+                    Guardar residente
+                </button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,190 @@
+```html
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>{% block titulo %}Asilo Cabeza de Algodón{% endblock %}</title>
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+
+<body class="app-body">
+
+    {% set rol = session.get('rol', '') %}
+
+    <div class="app-layout">
+
+        <!-- MENÚ LATERAL -->
+        <aside class="sidebar">
+
+            <div class="sidebar-brand">
+                <div class="brand-icon">
+                    <span>✚</span>
+                </div>
+
+                <div>
+                    <h2>Cabeza de Algodón</h2>
+                    <p>Sistema administrativo</p>
+                </div>
+            </div>
+
+            <!-- MENÚ PRINCIPAL -->
+            <div class="sidebar-section">
+                <span class="sidebar-label">MENÚ PRINCIPAL</span>
+
+                <a href="{{ url_for('inicio') }}"
+                    class="sidebar-link {% if request.endpoint == 'inicio' %}activo{% endif %}">
+                    <span class="menu-icon">⌂</span>
+                    <span>Panel principal</span>
+                </a>
+            </div>
+
+            <!-- GESTIÓN -->
+            {% if rol in ['Administrador', 'Recepcionista', 'Enfermero', 'Medico'] %}
+
+            <div class="sidebar-section">
+                <span class="sidebar-label">GESTIÓN</span>
+
+                <!-- RESIDENTES -->
+                {% if rol in ['Administrador', 'Recepcionista', 'Enfermero'] %}
+                <a href="{{ url_for('residentes') }}"
+                    class="sidebar-link {% if request.endpoint in ['residentes', 'detalle_residente', 'editar_residente'] %}activo{% endif %}">
+                    <span class="menu-icon">♙</span>
+                    <span>Residentes</span>
+                </a>
+                {% endif %}
+
+                <!-- FAMILIARES: SOLO ADMINISTRADOR -->
+                {% if rol == 'Administrador' %}
+                <a href="{{ url_for('familiares') }}"
+                    class="sidebar-link {% if request.endpoint == 'familiares' %}activo{% endif %}">
+                    <span class="menu-icon">♧</span>
+                    <span>Familiares</span>
+                </a>
+
+                <a href="{{ url_for('personal') }}"
+                    class="sidebar-link {% if request.endpoint == 'personal' %}activo{% endif %}">
+                    <span class="menu-icon">♙</span>
+                    <span>Personal médico</span>
+                </a>
+
+                {% endif %}
+
+                <!-- SOLICITUDES MÉDICAS -->
+                <a href="{{ url_for('solicitudes_medicas') }}"
+                    class="sidebar-link {% if request.endpoint in ['solicitudes_medicas', 'detalle_solicitud_medica', 'editar_solicitud_medica'] %}activo{% endif %}">
+                    <span class="menu-icon">✚</span>
+                    <span>Solicitudes médicas</span>
+                </a>
+
+                <!-- CITAS MÉDICAS -->
+                {% if rol in ['Administrador', 'Recepcionista', 'Enfermero', 'Medico'] %}
+                <a href="{{ url_for('citas_medicas') }}"
+                    class="sidebar-link {% if request.endpoint in ['citas_medicas', 'detalle_cita_medica', 'editar_cita_medica'] %}activo{% endif %}">
+                    <span class="menu-icon">▦</span>
+                    <span>Citas médicas</span>
+                </a>
+                {% endif %}
+
+                <!-- MÓDULOS MÉDICOS PENDIENTES -->
+                {% if rol in ['Administrador', 'Enfermero', 'Medico'] %}
+                <a href="{{ url_for('historial_medico') }}"
+                    class="sidebar-link {% if request.endpoint in ['historial_medico', 'detalle_historial_medico'] %}activo{% endif %}">
+                    <span class="menu-icon">▤</span>
+                    <span>Historial médico</span>
+                </a>
+
+                <a href="{{ url_for('medicamentos') }}"
+                    class="sidebar-link {% if request.endpoint in ['medicamentos', 'nuevo_medicamento', 'editar_medicamento'] %}activo{% endif %}">
+                    <span class="menu-icon">✚</span>
+                    <span>Medicamentos</span>
+                </a>
+
+                <a href="{{ url_for('laboratorio') }}"
+                    class="sidebar-link {% if request.endpoint in ['laboratorio'] %}activo{% endif %}">
+                    <span class="menu-icon">⌕</span>
+                    <span>Laboratorio</span>
+                </a>
+
+                {% endif %}
+
+            </div>
+            {% endif %}
+
+            <!-- ADMINISTRACIÓN -->
+            {% if rol in ['Administrador', 'Contador'] %}
+            <div class="sidebar-section">
+                <span class="sidebar-label">ADMINISTRACIÓN</span>
+
+                <div class="sidebar-link deshabilitado">
+                    <span class="menu-icon">Ｑ</span>
+                    <span>Facturación</span>
+                    <small>Próximamente</small>
+                </div>
+
+                <div class="sidebar-link deshabilitado">
+                    <span class="menu-icon">▥</span>
+                    <span>Reportes</span>
+                    <small>Próximamente</small>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- USUARIO Y CIERRE DE SESIÓN -->
+            <div class="sidebar-bottom">
+
+                <div class="usuario-sidebar">
+                    <div class="avatar">
+                        {{ session.get('nombre_completo', 'U')[0] | upper }}
+                    </div>
+
+                    <div class="usuario-info">
+                        <strong>{{ session.get('nombre_completo', 'Usuario') }}</strong>
+                        <span>{{ rol }}</span>
+                    </div>
+                </div>
+
+                <a href="{{ url_for('cerrar_sesion') }}" class="btn-cerrar-sidebar">
+                    <span>↪</span>
+                    Cerrar sesión
+                </a>
+
+            </div>
+
+        </aside>
+
+        <!-- ÁREA PRINCIPAL -->
+        <main class="main-area">
+
+            <header class="topbar">
+                <div>
+                    <span class="topbar-subtitle">ASILO DE ANCIANOS</span>
+                    <h1>Asilo Cabeza de Algodón</h1>
+                </div>
+
+                <div class="topbar-user">
+                    <span class="status-dot"></span>
+                    <span>{{ session.get('nombre_usuario', 'Usuario') }}</span>
+                </div>
+            </header>
+
+            <section class="contenido">
+                {% block contenido %}
+                {% endblock %}
+            </section>
+
+            <footer class="footer">
+                Sistema de Administración · Asilo Cabeza de Algodón
+            </footer>
+
+        </main>
+
+    </div>
+
+</body>
+
+</html>
+```

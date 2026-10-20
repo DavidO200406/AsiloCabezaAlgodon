@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Editar residente - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado">
+    <div>
+        <span class="etiqueta-seccion">GESTIÓN</span>
+        <h2>Editar residente</h2>
+        <p>Actualiza la información del residente registrado.</p>
+    </div>
+
+</div>
+
+
+<div class="panel-contenido">
+
+    <div class="panel-titulo">
+        <div>
+            <h3>Información del residente</h3>
+            <p>Modifica los datos que necesites actualizar.</p>
+        </div>
+    </div>
+
+
+    <form method="POST" class="form-residente">
+
+        <div class="form-grid">
+
+            <div class="campo">
+                <label for="nombres">Nombres *</label>
+
+                <input type="text" id="nombres" name="nombres" value="{{ interno.nombres }}" required>
+            </div>
+
+
+            <div class="campo">
+                <label for="apellidos">Apellidos *</label>
+
+                <input type="text" id="apellidos" name="apellidos" value="{{ interno.apellidos }}" required>
+            </div>
+
+
+            <div class="campo">
+                <label for="fecha_nacimiento">
+                    Fecha de nacimiento *
+                </label>
+
+                <input type="date" id="fecha_nacimiento" name="fecha_nacimiento" value="{{ interno.fecha_nacimiento }}"
+                    required>
+            </div>
+
+
+            <div class="campo">
+                <label for="fecha_ingreso">
+                    Fecha de ingreso *
+                </label>
+
+                <input type="date" id="fecha_ingreso" name="fecha_ingreso" value="{{ interno.fecha_ingreso }}" required>
+            </div>
+
+
+            <div class="campo">
+                <label for="genero">Género</label>
+
+                <select id="genero" name="genero">
+
+                    <option value="">
+                        Seleccione
+                    </option>
+
+                    <option value="Masculino" {% if interno.genero=="Masculino" %} selected {% endif %}>
+                        Masculino
+                    </option>
+
+                    <option value="Femenino" {% if interno.genero=="Femenino" %} selected {% endif %}>
+                        Femenino
+                    </option>
+
+                </select>
+            </div>
+
+
+            <div class="campo campo-completo">
+                <label for="motivo_ingreso">
+                    Motivo de ingreso
+                </label>
+
+                <textarea id="motivo_ingreso" name="motivo_ingreso"
+                    rows="3">{{ interno.motivo_ingreso or '' }}</textarea>
+            </div>
+
+
+            <div class="campo campo-completo">
+                <label for="diagnostico_ingreso">
+                    Diagnóstico de ingreso
+                </label>
+
+                <textarea id="diagnostico_ingreso" name="diagnostico_ingreso"
+                    rows="3">{{ interno.diagnostico_ingreso or '' }}</textarea>
+            </div>
+
+
+            <div class="campo campo-completo">
+                <label for="medicamentos_cajon">
+                    Medicamentos de cajón
+                </label>
+
+                <textarea id="medicamentos_cajon" name="medicamentos_cajon"
+                    rows="3">{{ interno.medicamentos_cajon or '' }}</textarea>
+            </div>
+
+
+            <div class="campo campo-completo">
+                <label for="observaciones">
+                    Observaciones
+                </label>
+
+                <textarea id="observaciones" name="observaciones" rows="3">{{ interno.observaciones or '' }}</textarea>
+            </div>
+
+        </div>
+
+        <div class="form-acciones">
+
+            <a href="{{ url_for('residentes') }}" class="btn-secundario">
+                Cancelar
+            </a>
+
+            <button type="submit" class="btn-principal">
+                Guardar cambios
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

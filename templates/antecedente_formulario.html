@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block titulo %}Registrar antecedente médico{% endblock %}
+
+{% block contenido %}
+<div class="medicamentos-pagina">
+
+    <div class="medicamentos-encabezado">
+        <div>
+            <span class="etiqueta-seccion">EXPEDIENTE CLÍNICO</span>
+            <h2>Registrar antecedente médico</h2>
+            <p>
+                Residente: {{ residente.nombres }}
+                {{ residente.apellidos }}
+            </p>
+        </div>
+
+        <a href="{{ url_for('detalle_historial_medico', id_interno=residente.id_interno) }}" class="btn btn-secundario">
+            Volver al expediente
+        </a>
+    </div>
+
+    <section class="medicamentos-panel">
+        <h3>Información del antecedente</h3>
+        <p class="medicamentos-descripcion">
+            Completa los datos del antecedente médico que deseas registrar.
+        </p>
+
+        {% if error %}
+        <div class="medicamentos-mensaje">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('nuevo_antecedente_medico', id_interno=residente.id_interno) }}">
+            <div class="medicamento-formulario-grid">
+
+                <div class="campo-formulario">
+                    <label for="fecha_registro">Fecha de registro *</label>
+                    <input type="date" id="fecha_registro" name="fecha_registro"
+                        value="{{ datos.get('fecha_registro', '') }}" required>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="tipo_condicion">Tipo de condición</label>
+                    <select id="tipo_condicion" name="tipo_condicion">
+                        <option value="">Seleccionar tipo</option>
+                        {% for tipo in [
+                        'Enfermedad crónica',
+                        'Enfermedad aguda',
+                        'Alergia',
+                        'Antecedente quirúrgico',
+                        'Otra condición'
+                        ] %}
+                        <option value="{{ tipo }}" {% if datos.get('tipo_condicion', '' )==tipo %}selected{% endif %}>
+                            {{ tipo }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="descripcion">Descripción *</label>
+                    <textarea id="descripcion" name="descripcion" rows="4"
+                        required>{{ datos.get('descripcion', '') }}</textarea>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" name="observaciones"
+                        rows="3">{{ datos.get('observaciones', '') }}</textarea>
+                </div>
+
+            </div>
+
+            <div class="medicamento-formulario-acciones">
+                <button type="submit" class="btn btn-primario">
+                    Guardar antecedente
+                </button>
+
+                <a href="{{ url_for('detalle_historial_medico', id_interno=residente.id_interno) }}"
+                    class="btn btn-secundario">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </section>
+
+</div>
+{% endblock %}

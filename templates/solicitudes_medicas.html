@@ -1,0 +1,354 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Solicitudes médicas - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado">
+
+    <div>
+        <span class="etiqueta-seccion">GESTIÓN MÉDICA</span>
+
+        <h2>Solicitudes médicas</h2>
+
+        <p>
+            Registra y consulta las solicitudes de atención médica
+            de los residentes.
+        </p>
+    </div>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- FORMULARIO -->
+<!-- ===================================================== -->
+
+<div class="panel-contenido">
+
+    <div class="panel-titulo">
+
+        <div>
+            <h3>Nueva solicitud médica</h3>
+
+            <p>
+                Registra una solicitud de atención para un residente.
+            </p>
+        </div>
+
+    </div>
+
+
+    <form method="POST" class="form-residente">
+
+        <div class="form-grid">
+
+
+            <!-- RESIDENTE -->
+
+            <div class="campo">
+
+                <label for="id_interno">
+                    Residente *
+                </label>
+
+                <select id="id_interno" name="id_interno" required>
+
+                    <option value="">
+                        Seleccione un residente
+                    </option>
+
+                    {% for residente in residentes %}
+
+                    <option value="{{ residente.id_interno }}">
+
+                        {{ residente.apellidos }},
+                        {{ residente.nombres }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- MÉDICO -->
+
+            <div class="campo">
+
+                <label for="id_medico_solicitado">
+                    Médico solicitado
+                </label>
+
+                <select id="id_medico_solicitado" name="id_medico_solicitado">
+
+                    <option value="">
+                        Sin médico asignado
+                    </option>
+
+                    {% for medico in medicos %}
+
+                    <option value="{{ medico.id_medico }}">
+
+                        {{ medico.apellidos }},
+                        {{ medico.nombres }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- ENFERMERO -->
+
+            <div class="campo">
+
+                <label for="id_enfermero">
+                    Enfermero relacionado
+                </label>
+
+                <select id="id_enfermero" name="id_enfermero">
+
+                    <option value="">
+                        Sin enfermero asignado
+                    </option>
+
+                    {% for enfermero in enfermeros %}
+
+                    <option value="{{ enfermero.id_enfermero }}">
+
+                        {{ enfermero.apellidos }},
+                        {{ enfermero.nombres }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- MOTIVO -->
+
+            <div class="campo campo-completo">
+
+                <label for="motivo">
+                    Motivo de la solicitud *
+                </label>
+
+                <textarea id="motivo" name="motivo" rows="4"
+                    placeholder="Describe el motivo por el cual se solicita atención médica..." required></textarea>
+
+            </div>
+
+
+            <!-- OBSERVACIONES -->
+
+            <div class="campo campo-completo">
+
+                <label for="observaciones">
+                    Observaciones
+                </label>
+
+                <textarea id="observaciones" name="observaciones" rows="4"
+                    placeholder="Agrega información adicional si es necesario..."></textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-acciones">
+
+            <button type="submit" class="btn-principal">
+                Registrar solicitud
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+
+<!-- ===================================================== -->
+<!-- LISTADO -->
+<!-- ===================================================== -->
+
+<div class="panel-contenido">
+
+    <div class="panel-titulo">
+
+        <div>
+
+            <h3>Solicitudes registradas</h3>
+
+            <p>
+                Historial de solicitudes médicas realizadas.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    {% if solicitudes %}
+
+    <div class="tabla-contenedor">
+
+        <table>
+
+            <thead>
+
+                <tr>
+
+                    <th>ID</th>
+
+                    <th>Residente</th>
+
+                    <th>Fecha</th>
+
+                    <th>Médico</th>
+
+                    <th>Enfermero</th>
+
+                    <th>Motivo</th>
+
+                    <th>Estado</th>
+
+                    <th>Acciones</th>
+
+                </tr>
+
+            </thead>
+
+
+            <tbody>
+
+                {% for solicitud in solicitudes %}
+
+                <tr>
+
+                    <td>
+                        #{{ solicitud.id_solicitud }}
+                    </td>
+
+
+                    <td>
+
+                        <strong>
+                            {{ solicitud.residente_nombres }}
+                            {{ solicitud.residente_apellidos }}
+                        </strong>
+
+                    </td>
+
+
+                    <td>
+
+                        {{ solicitud.fecha_solicitud }}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if solicitud.medico_nombres %}
+
+                        {{ solicitud.medico_nombres }}
+                        {{ solicitud.medico_apellidos }}
+
+                        {% else %}
+
+                        <span class="texto-secundario">
+                            No asignado
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if solicitud.enfermero_nombres %}
+
+                        {{ solicitud.enfermero_nombres }}
+                        {{ solicitud.enfermero_apellidos }}
+
+                        {% else %}
+
+                        <span class="texto-secundario">
+                            No asignado
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+
+
+                    <td>
+
+                        {{ solicitud.motivo }}
+
+                    </td>
+
+
+                    <td>
+
+                        {% if solicitud.estado == "Pendiente" %}
+
+                        <span class="estado-pendiente">
+                            {{ solicitud.estado }}
+                        </span>
+
+                        {% else %}
+
+                        <span class="estado-activo">
+                            {{ solicitud.estado }}
+                        </span>
+
+                        {% endif %}
+
+                    </td>
+                    <td>
+
+                        <a href="{{ url_for('detalle_solicitud_medica', id_solicitud=solicitud.id_solicitud) }}"
+                            class="btn-tabla">
+                            Ver
+                        </a>
+
+                    </td>
+                </tr>
+
+                {% endfor %}
+
+            </tbody>
+
+        </table>
+
+    </div>
+
+    {% else %}
+
+    <div class="mensaje-vacio">
+
+        <p>
+            No hay solicitudes médicas registradas.
+        </p>
+
+    </div>
+
+    {% endif %}
+
+</div>
+
+{% endblock %}

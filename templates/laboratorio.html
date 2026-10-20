@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block titulo %}Laboratorio - Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado laboratorio-encabezado">
+    <div>
+        <span class="etiqueta-seccion">ÁREA MÉDICA</span>
+        <h2>Laboratorio</h2>
+        <p>Consulta los exámenes disponibles y sus precios.</p>
+    </div>
+    {% if session.get('rol') == 'Administrador' %}
+    <a href="{{ url_for('nuevo_examen_laboratorio') }}" class="laboratorio-btn-nuevo">
+        <span>+</span> Registrar nuevo examen
+    </a>
+    {% endif %}
+
+    {% if session.get('rol') in ['Administrador', 'Medico', 'Enfermero'] %}
+    <a href="{{ url_for('resultados_laboratorio') }}" class="laboratorio-btn-secundario">
+        Ver resultados de examenes
+    </a>
+    {% endif %}
+</div>
+
+<div class="laboratorio-resumen">
+    <div class="laboratorio-resumen-icono">⌕</div>
+    <div>
+        <h3>Catálogo de exámenes</h3>
+        <p>Consulta los análisis disponibles para la atención de los residentes.</p>
+    </div>
+</div>
+
+<div class="laboratorio-panel">
+
+    <form method="GET" action="{{ url_for('laboratorio') }}" class="laboratorio-busqueda">
+        <div class="laboratorio-campo">
+            <label for="busqueda">Buscar examen</label>
+            <input type="text" id="busqueda" name="busqueda" value="{{ busqueda }}"
+                placeholder="Escribe el nombre o la descripción...">
+        </div>
+
+        <div class="laboratorio-acciones">
+            <button type="submit" class="laboratorio-btn">
+                Buscar
+            </button>
+            <a href="{{ url_for('laboratorio') }}" class="laboratorio-btn-secundario">
+                Limpiar
+            </a>
+        </div>
+    </form>
+
+
+    <div class="laboratorio-tabla-contenedor">
+        <table class="laboratorio-tabla">
+            <thead>
+                <tr>
+                    <th>Nombre del examen</th>
+                    <th>Descripción</th>
+                    <th>Precio</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for examen in examenes %}
+                <tr>
+                    <td>
+                        <strong>{{ examen.nombre }}</strong>
+                    </td>
+
+                    <td>{{ examen.descripcion or 'Sin descripción' }}</td>
+
+                    <td class="laboratorio-precio">
+                        Q {{ "%.2f"|format(examen.precio) }}
+                    </td>
+
+                    <td>
+                        {% if examen.estado == 1 %}
+                        <span class="laboratorio-estado activo">Activo</span>
+                        {% else %}
+                        <span class="laboratorio-estado inactivo">Inactivo</span>
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if session.get('rol') == 'Administrador' %}
+                        <a href="{{ url_for('editar_examen_laboratorio', id_examen=examen.id_examen) }}"
+                            class="laboratorio-btn-secundario">
+                            Editar
+                        </a>
+                        {% else %}
+                        <span>Sin acciones</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="5" class="laboratorio-vacio">
+                        No se encontraron exámenes.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div class="laboratorio-pie">
+        Exámenes encontrados: {{ examenes|length }}
+    </div>
+
+</div>
+
+{% endblock %}

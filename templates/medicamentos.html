@@ -1,0 +1,159 @@
+{% extends "base.html" %}
+
+{% block titulo %}Medicamentos - Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+
+<div class="medicamentos-pagina">
+
+    <!-- ENCABEZADO -->
+    <div class="medicamentos-encabezado">
+        <div>
+            <span class="etiqueta-seccion">GESTIÓN MÉDICA</span>
+            <h2>Medicamentos</h2>
+            <p>Consulta y administra el inventario de medicamentos del asilo.</p>
+        </div>
+
+        {% if session.get('rol') == 'Administrador' %}
+        <a href="{{ url_for('nuevo_medicamento') }}" class="btn btn-primario">
+            + Registrar medicamento
+        </a>
+        {% endif %}
+    </div>
+
+    <!-- MENSAJES -->
+    {% if mensaje == 'registrado' %}
+    <div class="medicamentos-mensaje exito" role="status">
+        El medicamento se registró correctamente.
+    </div>
+    {% elif mensaje == 'actualizado' %}
+    <div class="medicamentos-mensaje exito" role="status">
+        Los datos del medicamento se actualizaron correctamente.
+    </div>
+    {% elif mensaje == 'no_encontrado' %}
+    <div class="medicamentos-mensaje error" role="alert">
+        No se encontró el medicamento solicitado.
+    </div>
+    {% endif %}
+
+    <!-- BÚSQUEDA -->
+    <section class="medicamentos-panel">
+        <h3>Buscar medicamentos</h3>
+        <p class="medicamentos-descripcion">
+            Busca por nombre o descripción del medicamento.
+        </p>
+
+        <form method="GET" action="{{ url_for('medicamentos') }}">
+            <div class="medicamentos-busqueda">
+                <div class="campo-formulario">
+                    <label for="busqueda">Nombre o descripción</label>
+                    <input type="text" id="busqueda" name="busqueda" placeholder="Ej. Paracetamol"
+                        value="{{ busqueda }}">
+                </div>
+
+                <div class="medicamentos-acciones">
+                    <button type="submit" class="btn btn-primario">
+                        Buscar
+                    </button>
+
+                    <a href="{{ url_for('medicamentos') }}" class="btn btn-secundario">
+                        Limpiar
+                    </a>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <!-- INVENTARIO -->
+    <section class="medicamentos-panel">
+        <div class="medicamentos-encabezado">
+            <div>
+                <h3>Inventario registrado</h3>
+                <p class="medicamentos-descripcion">
+                    Total de resultados: {{ medicamentos|length }}
+                </p>
+            </div>
+        </div>
+
+        {% if medicamentos %}
+        <div class="medicamentos-tabla-contenedor">
+            <table class="medicamentos-tabla">
+                <thead>
+                    <tr>
+                        <th>Medicamento</th>
+                        <th>Presentación</th>
+                        <th>Unidad</th>
+                        <th>Existencias</th>
+                        <th>Estado</th>
+                        {% if session.get('rol') == 'Administrador' %}
+                        <th>Acciones</th>
+                        {% endif %}
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for medicamento in medicamentos %}
+                    <tr>
+                        <td>
+                            <span class="medicamentos-nombre">
+                                {{ medicamento.nombre }}
+                            </span>
+
+                            {% if medicamento.descripcion %}
+                            <span class="medicamentos-detalle">
+                                {{ medicamento.descripcion }}
+                            </span>
+                            {% endif %}
+                        </td>
+
+                        <td>
+                            {{ medicamento.presentacion or 'No especificada' }}
+                        </td>
+
+                        <td>
+                            {{ medicamento.unidad_medida or 'No especificada' }}
+                        </td>
+
+                        <td>
+                            <span class="medicamentos-stock">
+                                {{ medicamento.stock }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {% if medicamento.estado == 1 %}
+                            <span class="medicamentos-estado activo">Activo</span>
+                            {% else %}
+                            <span class="medicamentos-estado inactivo">Inactivo</span>
+                            {% endif %}
+                        </td>
+
+                        {% if session.get('rol') == 'Administrador' %}
+                        <td>
+                            <a href="{{ url_for('editar_medicamento', id_medicamento=medicamento.id_medicamento) }}"
+                                class="btn btn-secundario">
+                                Editar
+                            </a>
+                        </td>
+                        {% endif %}
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <div class="medicamentos-vacio">
+            <strong>No hay medicamentos para mostrar</strong>
+            {% if busqueda %}
+            No se encontraron resultados para "{{ busqueda }}".
+            {% else %}
+            Todavía no hay medicamentos registrados en el inventario.
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+
+{% endblock %}

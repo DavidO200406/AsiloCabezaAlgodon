@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Detalle de cita médica - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado">
+    <div>
+        <span class="etiqueta-seccion">ÁREA MÉDICA</span>
+        <h2>Detalle de cita médica</h2>
+        <p>Consulta la información de la cita registrada.</p>
+    </div>
+</div>
+
+<div class="seccion-titulo">
+    <h3>Información de la cita #{{ cita.id_cita }}</h3>
+    <p>Datos del residente, médico y programación.</p>
+</div>
+
+<div class="detalle-residente">
+    <div class="detalle-grid">
+
+        <div class="detalle-campo">
+            <label>Número de cita</label>
+            <p>{{ cita.id_cita }}</p>
+        </div>
+
+        <div class="detalle-campo">
+            <label>Residente</label>
+            <p>
+                {{ cita.residente_nombres }}
+                {{ cita.residente_apellidos }}
+            </p>
+        </div>
+
+        <div class="detalle-campo">
+            <label>Médico responsable</label>
+            <p>
+                {{ cita.medico_nombres }}
+                {{ cita.medico_apellidos }}
+            </p>
+        </div>
+
+        <div class="detalle-campo">
+            <label>Fecha y hora</label>
+            <p>{{ cita.fecha_cita.strftime('%d/%m/%Y %H:%M') }}</p>
+        </div>
+
+        <div class="detalle-campo">
+            <label>Estado de la cita</label>
+            <p>
+                {% if cita.estado == 'Programada' %}
+                <span class="estado-programada">Programada</span>
+                {% elif cita.estado == 'Realizada' %}
+                <span class="estado-realizada">Realizada</span>
+                {% elif cita.estado == 'Cancelada' %}
+                <span class="estado-cancelada">Cancelada</span>
+                {% else %}
+                <span class="estado-pendiente">{{ cita.estado }}</span>
+                {% endif %}
+            </p>
+
+        </div>
+
+        <div class="detalle-campo">
+            <label>Número de solicitud</label>
+            <p>{{ cita.id_solicitud }}</p>
+        </div>
+
+        <div class="detalle-campo">
+            <label>Motivo de la solicitud</label>
+            <p>{{ cita.motivo }}</p>
+        </div>
+
+        <div class="detalle-campo">
+            <label>Estado de la solicitud</label>
+            <p>{{ cita.estado_solicitud }}</p>
+        </div>
+
+        <div class="detalle-campo">
+            <label>Observaciones de la cita</label>
+            <p>{{ cita.observaciones or 'Sin observaciones' }}</p>
+        </div>
+
+    </div>
+
+    <div class="detalle-acciones">
+        <a href="{{ url_for('citas_medicas') }}" class="btn-principal" style="text-decoration: none;">
+            Volver a citas médicas
+        </a>
+    </div>
+</div>
+
+{% endblock %}

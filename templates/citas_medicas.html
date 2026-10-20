@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Citas médicas - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado">
+    <div>
+        <span class="etiqueta-seccion">ÁREA MÉDICA</span>
+        <h2>Citas médicas</h2>
+        <p>Programa y consulta las citas médicas de los residentes.</p>
+    </div>
+</div>
+
+<div class="seccion-titulo">
+    <h3>Registrar nueva cita</h3>
+    <p>Completa los datos para programar una cita médica.</p>
+</div>
+
+<div class="detalle-residente">
+    <form method="POST" action="{{ url_for('citas_medicas') }}">
+
+        <div class="detalle-grid">
+
+            <div class="detalle-campo">
+                <label for="id_solicitud">Solicitud médica</label>
+                <select id="id_solicitud" name="id_solicitud" required>
+                    <option value="">Selecciona una solicitud</option>
+                    {% for solicitud in solicitudes %}
+                    <option value="{{ solicitud.id_solicitud }}">
+                        #{{ solicitud.id_solicitud }} -
+                        {{ solicitud.residente_nombres }}
+                        {{ solicitud.residente_apellidos }}
+                        — {{ solicitud.motivo }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="detalle-campo">
+                <label for="id_medico">Médico responsable</label>
+                <select id="id_medico" name="id_medico" required>
+                    <option value="">Selecciona un médico</option>
+                    {% for medico in medicos %}
+                    <option value="{{ medico.id_medico }}">
+                        {{ medico.apellidos }}, {{ medico.nombres }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="detalle-campo">
+                <label for="fecha_cita">Fecha y hora</label>
+                <input type="datetime-local" id="fecha_cita" name="fecha_cita" required>
+            </div>
+
+            <div class="detalle-campo">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" name="observaciones" rows="3"
+                    placeholder="Detalles adicionales de la cita..."></textarea>
+            </div>
+
+        </div>
+
+        <div class="detalle-acciones">
+            <button type="submit" class="btn-principal">
+                Registrar cita
+            </button>
+        </div>
+
+    </form>
+</div>
+
+<div class="seccion-titulo">
+    <h3>Citas registradas</h3>
+    <p>Consulta las citas programadas y su estado actual.</p>
+</div>
+
+<div class="tabla-contenedor">
+    <table>
+        <thead>
+            <tr>
+                <th>N.º</th>
+                <th>Residente</th>
+                <th>Médico</th>
+                <th>Fecha y hora</th>
+                <th>Estado</th>
+                <th>Observaciones</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for cita in citas %}
+            <tr>
+                <td>{{ cita.id_cita }}</td>
+
+                <td>
+                    {{ cita.residente_nombres }}
+                    {{ cita.residente_apellidos }}
+                </td>
+
+                <td>
+                    {{ cita.medico_nombres }}
+                    {{ cita.medico_apellidos }}
+                </td>
+
+                <td>{{ cita.fecha_cita.strftime('%d/%m/%Y %H:%M') }}</td>
+
+
+                <td>
+                    {% if cita.estado == 'Programada' %}
+                    <span class="estado-programada">Programada</span>
+                    {% elif cita.estado == 'Realizada' %}
+                    <span class="estado-realizada">Realizada</span>
+                    {% elif cita.estado == 'Cancelada' %}
+                    <span class="estado-cancelada">Cancelada</span>
+                    {% else %}
+                    <span class="estado-pendiente">{{ cita.estado }}</span>
+                    {% endif %}
+                </td>
+
+
+                <td>{{ cita.observaciones or 'Sin observaciones' }}</td>
+                <td>
+                    <a href="{{ url_for('detalle_cita_medica', id_cita=cita.id_cita) }}" class="btn-tabla">
+                        Ver detalles
+                    </a>
+                    <a href="{{ url_for('editar_cita_medica', id_cita=cita.id_cita) }}" class="btn-tabla">
+                        Editar
+                    </a>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="6">
+                    Todavía no hay citas registradas.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

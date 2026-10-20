@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Familiares - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado">
+    <div>
+        <span class="etiqueta-seccion">GESTIÓN</span>
+        <h2>Familiares</h2>
+        <p>Consulta los familiares y responsables de los residentes del asilo.</p>
+    </div>
+</div>
+
+{% if estado == 'enviado' %}
+<div class="mensaje-exito">
+    El correo se ha enviado correctamente.
+</div>
+{% elif estado == 'sin_correo' %}
+<div class="mensaje-error">
+    Este familiar no tiene un correo electrónico registrado.
+</div>
+{% endif %}
+
+<div class="estadistica-residentes">
+    <div class="estadistica-icono">♧</div>
+    <div>
+        <span>Total de familiares registrados</span>
+        <strong>{{ familiares | length }}</strong>
+    </div>
+</div>
+
+<div class="panel-contenido">
+
+    <div class="panel-titulo">
+        <div>
+            <h3>Directorio de familiares</h3>
+            <p>Información de contacto registrada en el sistema.</p>
+        </div>
+
+        <span class="contador">
+            {{ familiares | length }} registros
+        </span>
+    </div>
+
+    <form method="GET" action="{{ url_for('familiares') }}" class="busqueda-residentes">
+        <div class="campo-busqueda">
+            <label for="buscar">Buscar familiar o residente</label>
+            <input type="text" id="buscar" name="buscar" value="{{ busqueda }}" placeholder="Nombre o apellido...">
+        </div>
+
+        <button type="submit" class="btn-principal">
+            Buscar
+        </button>
+
+        {% if busqueda %}
+        <a href="{{ url_for('familiares') }}" class="btn-secundario">
+            Limpiar
+        </a>
+        {% endif %}
+    </form>
+
+    <div class="tabla-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Familiar</th>
+                    <th>Residente relacionado</th>
+                    <th>Parentesco</th>
+                    <th>Teléfono</th>
+                    <th>Correo electrónico</th>
+                    <th>Responsable de pago</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for familiar in familiares %}
+                <tr>
+                    <td class="nombre-tabla">
+                        {{ familiar.nombres }} {{ familiar.apellidos }}
+                    </td>
+
+                    <td>
+                        {{ familiar.nombre_residente }}
+                        {{ familiar.apellido_residente }}
+                    </td>
+
+                    <td>{{ familiar.parentesco }}</td>
+
+                    <td>
+                        {{ familiar.telefono or 'No registrado' }}
+                    </td>
+
+                    <td>
+                        {{ familiar.correo or 'No registrado' }}
+                    </td>
+
+                    <td>
+                        {% if familiar.responsable_pago %}
+                        <span class="estado-activo">Sí</span>
+                        {% else %}
+                        No
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {% if familiar.correo %}
+                        <a href="{{ url_for(
+                                'redactar_correo',
+                                id_familiar=familiar.id_familiar
+                            ) }}" class="btn-tabla">
+                            Enviar correo
+                        </a>
+                        {% else %}
+                        <span>Sin correo</span>
+                        {% endif %}
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="7" class="tabla-vacia">
+                        {% if busqueda %}
+                        No se encontraron familiares con esa búsqueda.
+                        {% else %}
+                        Todavía no hay familiares registrados.
+                        Registra al familiar desde el módulo de Residentes.
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}

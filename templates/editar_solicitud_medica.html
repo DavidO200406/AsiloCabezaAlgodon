@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Editar solicitud médica - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado">
+
+    <div>
+
+        <span class="etiqueta-seccion">
+            GESTIÓN MÉDICA
+        </span>
+
+        <h2>Editar solicitud médica</h2>
+
+        <p>
+            Actualiza la información de la solicitud registrada.
+        </p>
+
+    </div>
+
+
+    <a href="{{ url_for('detalle_solicitud_medica', id_solicitud=solicitud.id_solicitud) }}" class="btn-secundario">
+        ← Volver al detalle
+    </a>
+
+</div>
+
+
+<div class="panel-contenido">
+
+    <div class="panel-titulo">
+
+        <div>
+
+            <h3>
+                Solicitud #{{ solicitud.id_solicitud }}
+            </h3>
+
+            <p>
+                Modifica los datos necesarios.
+            </p>
+
+        </div>
+
+    </div>
+
+
+    <form method="POST" class="form-residente">
+
+        <div class="form-grid">
+
+
+            <!-- RESIDENTE -->
+
+            <div class="campo">
+
+                <label for="id_interno">
+                    Residente *
+                </label>
+
+                <select id="id_interno" name="id_interno" required>
+
+                    {% for residente in residentes %}
+
+                    <option value="{{ residente.id_interno }}" {% if residente.id_interno==solicitud.id_interno %}
+                        selected {% endif %}>
+
+                        {{ residente.apellidos }},
+                        {{ residente.nombres }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- MÉDICO -->
+
+            <div class="campo">
+
+                <label for="id_medico_solicitado">
+                    Médico solicitado
+                </label>
+
+                <select id="id_medico_solicitado" name="id_medico_solicitado">
+
+                    <option value="">
+                        Sin médico asignado
+                    </option>
+
+                    {% for medico in medicos %}
+
+                    <option value="{{ medico.id_medico }}" {% if medico.id_medico==solicitud.id_medico_solicitado %}
+                        selected {% endif %}>
+
+                        {{ medico.apellidos }},
+                        {{ medico.nombres }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- ENFERMERO -->
+
+            <div class="campo">
+
+                <label for="id_enfermero">
+                    Enfermero relacionado
+                </label>
+
+                <select id="id_enfermero" name="id_enfermero">
+
+                    <option value="">
+                        Sin enfermero asignado
+                    </option>
+
+                    {% for enfermero in enfermeros %}
+
+                    <option value="{{ enfermero.id_enfermero }}" {% if enfermero.id_enfermero==solicitud.id_enfermero %}
+                        selected {% endif %}>
+
+                        {{ enfermero.apellidos }},
+                        {{ enfermero.nombres }}
+
+                    </option>
+
+                    {% endfor %}
+
+                </select>
+
+            </div>
+
+
+            <!-- ESTADO -->
+
+            <div class="campo">
+
+                <label for="estado">
+                    Estado *
+                </label>
+
+                <select id="estado" name="estado" required>
+
+                    <option value="Pendiente" {% if solicitud.estado=="Pendiente" %} selected {% endif %}>
+                        Pendiente
+                    </option>
+
+                    <option value="Atendida" {% if solicitud.estado=="Atendida" %} selected {% endif %}>
+                        Atendida
+                    </option>
+
+                    <option value="Cancelada" {% if solicitud.estado=="Cancelada" %} selected {% endif %}>
+                        Cancelada
+                    </option>
+
+                </select>
+
+            </div>
+
+
+            <!-- MOTIVO -->
+
+            <div class="campo campo-completo">
+
+                <label for="motivo">
+                    Motivo de la solicitud *
+                </label>
+
+                <textarea id="motivo" name="motivo" rows="4" required>{{ solicitud.motivo }}</textarea>
+
+            </div>
+
+
+            <!-- OBSERVACIONES -->
+
+            <div class="campo campo-completo">
+
+                <label for="observaciones">
+                    Observaciones
+                </label>
+
+                <textarea id="observaciones" name="observaciones"
+                    rows="4">{{ solicitud.observaciones or '' }}</textarea>
+
+            </div>
+
+        </div>
+
+
+        <div class="form-acciones">
+
+            <a href="{{ url_for('detalle_solicitud_medica', id_solicitud=solicitud.id_solicitud) }}"
+                class="btn-secundario">
+                Cancelar
+            </a>
+
+            <button type="submit" class="btn-principal">
+                Guardar cambios
+            </button>
+
+        </div>
+
+    </form>
+
+</div>
+
+{% endblock %}

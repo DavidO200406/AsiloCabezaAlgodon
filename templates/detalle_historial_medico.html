@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block titulo %}Detalle del historial médico{% endblock %}
+
+{% block contenido %}
+<div class="medicamentos-pagina">
+
+    <div class="medicamentos-encabezado">
+        <div>
+            <span class="etiqueta-seccion">EXPEDIENTE CLÍNICO</span>
+            <h2>{{ residente.nombres }} {{ residente.apellidos }}</h2>
+            <p>Consulta de antecedentes y atenciones médicas.</p>
+        </div>
+
+        <a href="{{ url_for('historial_medico') }}" class="btn btn-secundario">
+            Volver a residentes
+        </a>
+    </div>
+
+    <section class="medicamentos-panel">
+        <h3>Información del residente</h3>
+
+        <p><strong>Fecha de ingreso:</strong>
+            {{ residente.fecha_ingreso.strftime('%d/%m/%Y') }}</p>
+
+        <p><strong>Estado:</strong> {{ residente.estado }}</p>
+
+        <p><strong>Diagnóstico de ingreso:</strong><br>
+            {{ residente.diagnostico_ingreso or 'Sin información registrada' }}</p>
+
+        <p><strong>Medicamentos de cajón:</strong><br>
+            {{ residente.medicamentos_cajon or 'Sin información registrada' }}</p>
+
+        <p><strong>Observaciones:</strong><br>
+            {{ residente.observaciones or 'Sin observaciones registradas' }}</p>
+    </section>
+
+    <section class="medicamentos-panel">
+        <h3>Antecedentes y condiciones médicas</h3>
+        {% if session.get('rol') in ['Administrador', 'Medico'] %}
+        <div class="medicamentos-acciones">
+            <a href="{{ url_for('nuevo_antecedente_medico', id_interno=residente.id_interno) }}"
+                class="btn btn-primario">
+                Registrar antecedente médico
+            </a>
+        </div>
+        {% endif %}
+
+        {% if antecedentes %}
+        <div class="medicamentos-tabla-contenedor">
+            <table class="medicamentos-tabla">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo de condición</th>
+                        <th>Descripción</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for antecedente in antecedentes %}
+                    <tr>
+                        <td>{{ antecedente.fecha_registro.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ antecedente.tipo_condicion or 'No especificada' }}</td>
+                        <td>{{ antecedente.descripcion }}</td>
+                        <td>{{ antecedente.observaciones or 'Sin observaciones' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="medicamentos-vacio">
+            <strong>Sin antecedentes registrados</strong>
+            No hay antecedentes médicos registrados para este residente.
+        </div>
+        {% endif %}
+    </section>
+
+    <section class="medicamentos-panel">
+        <h3>Visitas médicas</h3>
+
+        {% if visitas %}
+        <div class="medicamentos-tabla-contenedor">
+            <table class="medicamentos-tabla">
+                <thead>
+                    <tr>
+                        <th>Fecha de visita</th>
+                        <th>Médico</th>
+                        <th>Motivo</th>
+                        <th>Diagnóstico</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for visita in visitas %}
+                    <tr>
+                        <td>{{ visita.fecha_visita.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ visita.medico }}</td>
+                        <td>{{ visita.motivo_visita }}</td>
+                        <td>{{ visita.diagnostico or 'Pendiente de registrar' }}</td>
+                        <td>{{ visita.observaciones_medicas or 'Sin observaciones' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="medicamentos-vacio">
+            <strong>Sin visitas médicas registradas</strong>
+            No hay visitas médicas asociadas a este residente.
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

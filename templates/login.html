@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Asilo Cabeza de Algodón</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/estilos.css') }}">
+</head>
+
+<body>
+
+    <div class="login-container">
+
+        <div class="login-card">
+
+            <h1>Asilo Cabeza de Algodón</h1>
+            <h2>Iniciar sesión</h2>
+
+            {% if error %}
+            <div class="error">
+                {{ error }}
+            </div>
+            {% endif %}
+
+            <form action="{{ url_for('procesar_login') }}" method="POST">
+
+                <label for="usuario">Usuario</label>
+                <input type="text" id="usuario" name="usuario" placeholder="Ingrese su usuario" autocomplete="username">
+
+                <label for="contraseña">Contraseña</label>
+                <input type="password" id="contraseña" name="contraseña" placeholder="Ingrese su contraseña"
+                    autocomplete="current-password">
+
+                <button type="submit" id="btnIngresar" disabled>
+                    Ingresar al sistema
+                </button>
+
+            </form>
+
+        </div>
+
+    </div>
+
+    <script>
+        const usuario = document.getElementById("usuario");
+        const contraseña = document.getElementById("contraseña");
+        const btnIngresar = document.getElementById("btnIngresar");
+
+        function validarFormulario() {
+            const usuarioCompleto = usuario.value.trim() !== "";
+            const contraseñaCompleta = contraseña.value.trim() !== "";
+
+            btnIngresar.disabled = !(usuarioCompleto && contraseñaCompleta);
+        }
+
+        usuario.addEventListener("input", validarFormulario);
+        contraseña.addEventListener("input", validarFormulario);
+    </script>
+
+</body>
+
+</html>

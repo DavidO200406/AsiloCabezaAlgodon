@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block titulo %}
+Editar cita médica - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<div class="pagina-encabezado">
+    <div>
+        <span class="etiqueta-seccion">ÁREA MÉDICA</span>
+        <h2>Editar cita médica</h2>
+        <p>Actualiza la programación y la información de la cita.</p>
+    </div>
+</div>
+
+<div class="seccion-titulo">
+    <h3>Editar cita #{{ cita.id_cita }}</h3>
+    <p>Modifica los campos necesarios y guarda los cambios.</p>
+</div>
+
+<div class="detalle-residente">
+    <form method="POST" action="{{ url_for('editar_cita_medica', id_cita=cita.id_cita) }}">
+
+        <div class="detalle-grid">
+
+            <div class="detalle-campo">
+                <label for="id_solicitud">Solicitud médica</label>
+                <select id="id_solicitud" name="id_solicitud" required>
+                    {% for solicitud in solicitudes %}
+                    <option value="{{ solicitud.id_solicitud }}" {% if solicitud.id_solicitud==cita.id_solicitud
+                        %}selected{% endif %}>
+                        #{{ solicitud.id_solicitud }} -
+                        {{ solicitud.residente_nombres }}
+                        {{ solicitud.residente_apellidos }}
+                        — {{ solicitud.motivo }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="detalle-campo">
+                <label for="id_medico">Médico responsable</label>
+                <select id="id_medico" name="id_medico" required>
+                    {% for medico in medicos %}
+                    <option value="{{ medico.id_medico }}" {% if medico.id_medico==cita.id_medico %}selected{% endif %}>
+                        {{ medico.apellidos }}, {{ medico.nombres }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="detalle-campo">
+                <label for="fecha_cita">Fecha y hora</label>
+                <input type="datetime-local" id="fecha_cita" name="fecha_cita"
+                    value="{{ cita.fecha_cita.strftime('%Y-%m-%dT%H:%M') }}" required>
+            </div>
+
+            <div class="detalle-campo">
+                <label for="estado">Estado de la cita</label>
+                <select id="estado" name="estado" required>
+                    {% for estado_opcion in ['Programada', 'Realizada', 'Cancelada'] %}
+                    <option value="{{ estado_opcion }}" {% if cita.estado==estado_opcion %}selected{% endif %}>
+                        {{ estado_opcion }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="detalle-campo">
+                <label for="observaciones">Observaciones</label>
+                <textarea id="observaciones" name="observaciones" rows="4"
+                    placeholder="Detalles adicionales de la cita...">{{ cita.observaciones or '' }}</textarea>
+            </div>
+
+        </div>
+
+        <div class="detalle-acciones">
+            <button type="submit" class="btn-principal">
+                Guardar cambios
+            </button>
+
+            <a href="{{ url_for('detalle_cita_medica', id_cita=cita.id_cita) }}" class="btn-tabla"
+                style="text-decoration: none;">
+                Cancelar
+            </a>
+        </div>
+
+    </form>
+</div>
+
+{% endblock %}

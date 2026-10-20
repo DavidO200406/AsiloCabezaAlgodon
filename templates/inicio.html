@@ -1,0 +1,138 @@
+```html
+{% extends "base.html" %}
+
+{% block titulo %}
+Panel principal - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+{% set rol = session.get('rol', '') %}
+
+<div class="pagina-encabezado">
+    <div>
+        <span class="etiqueta-seccion">INICIO</span>
+        <h2>Panel principal</h2>
+        <p>Bienvenido al sistema de administración del asilo.</p>
+    </div>
+</div>
+
+<div class="bienvenida-panel">
+    <div>
+        <h3>¡Bienvenido, {{ session.get('nombre_completo', 'Usuario') }}!</h3>
+        <p>
+            Desde este espacio podrás administrar la información
+            correspondiente a tu área de trabajo.
+        </p>
+    </div>
+
+    <div class="bienvenida-icono">✚</div>
+</div>
+
+<div class="seccion-titulo">
+    <h3>Accesos rápidos</h3>
+    <p>Selecciona un módulo para comenzar.</p>
+</div>
+
+<div class="dashboard-grid">
+
+    <!-- RESIDENTES -->
+    {% if rol in ['Administrador', 'Recepcionista', 'Enfermero'] %}
+    <a href="{{ url_for('residentes') }}" class="dashboard-card">
+        <div class="card-icon verde">♙</div>
+        <h4>Residentes</h4>
+        <p>Registrar y consultar información de los adultos mayores.</p>
+        <span class="card-link">Abrir módulo →</span>
+    </a>
+    {% endif %}
+
+    <!-- FAMILIARES: SOLO ADMINISTRADOR -->
+    {% if rol == 'Administrador' %}
+    <a href="{{ url_for('familiares') }}" class="dashboard-card">
+        <div class="card-icon azul">♧</div>
+        <h4>Familiares</h4>
+        <p>Administración de contactos y responsables de pago.</p>
+        <span class="card-link">Abrir módulo →</span>
+    </a>
+
+
+    <!-- PERSONAL MÉDICO -->
+    <a href="{{ url_for('personal') }}" class="dashboard-card">
+        <div class="card-icon verde">♙</div>
+        <h4>Personal médico</h4>
+        <p>Administración y consulta de médicos y enfermeros.</p>
+        <span class="card-link">Abrir módulo →</span>
+    </a>
+
+
+    {% endif %}
+
+    <!-- SOLICITUDES MÉDICAS -->
+    {% if rol in ['Administrador', 'Recepcionista', 'Enfermero', 'Medico'] %}
+    <a href="{{ url_for('solicitudes_medicas') }}" class="dashboard-card">
+        <div class="card-icon morado">✚</div>
+        <h4>Solicitudes médicas</h4>
+        <p>Registro y seguimiento de solicitudes de atención médica.</p>
+        <span class="card-link">Abrir módulo →</span>
+    </a>
+    {% endif %}
+
+    <!-- CITAS MÉDICAS -->
+    {% if rol in ['Administrador', 'Recepcionista', 'Enfermero', 'Medico'] %}
+    <a href="{{ url_for('citas_medicas') }}" class="dashboard-card">
+        <div class="card-icon azul">▦</div>
+        <h4>Citas médicas</h4>
+        <p>Consulta y seguimiento de citas médicas.</p>
+        <span class="card-link">Abrir módulo →</span>
+    </a>
+    {% endif %}
+
+
+    <!-- MÓDULOS MÉDICOS -->
+    {% if rol in ['Administrador', 'Enfermero', 'Medico'] %}
+
+    <a href="{{ url_for('historial_medico') }}" class="dashboard-card">
+        <div class="card-icon morado">▤</div>
+        <h4>Historial médico</h4>
+        <p>Consulta los antecedentes y las visitas médicas de los residentes.</p>
+        <span class="card-link">Abrir módulo →</span>
+    </a>
+
+    <a href="{{ url_for('medicamentos') }}" class="dashboard-card">
+        <div class="card-icon naranja">✚</div>
+        <h4>Medicamentos</h4>
+        <p>Consulta y administración del inventario de medicamentos.</p>
+        <span class="card-link">Abrir módulo →</span>
+    </a>
+
+    <!-- LABORATORIO -->
+    <a href="{{ url_for('laboratorio') }}" class="dashboard-card">
+        <div class="card-icon azul">⌕</div>
+        <h4>Laboratorio</h4>
+        <p>Consulta de exámenes y resultados de laboratorio.</p>
+        <span class="card-link">Abrir módulo →</span>
+    </a>
+
+    {% endif %}
+
+    <!-- FACTURACIÓN Y REPORTES -->
+    {% if rol in ['Administrador', 'Contador'] %}
+    <div class="dashboard-card card-pendiente">
+        <div class="card-icon naranja">Ｑ</div>
+        <h4>Facturación</h4>
+        <p>Control de cobros, pagos y movimientos.</p>
+        <span class="card-link">Próximamente</span>
+    </div>
+
+    <div class="dashboard-card card-pendiente">
+        <div class="card-icon verde">▥</div>
+        <h4>Reportes</h4>
+        <p>Consulta de información administrativa y médica.</p>
+        <span class="card-link">Próximamente</span>
+    </div>
+    {% endif %}
+
+</div>
+
+{% endblock %}
+```

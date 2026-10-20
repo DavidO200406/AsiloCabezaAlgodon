@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block titulo %}Personal médico - Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+<div class="personal-pagina">
+
+    <div class="personal-encabezado">
+        <div>
+            <h1>Personal médico</h1>
+            <p>Consulta y administración de médicos y enfermeros del asilo.</p>
+        </div>
+
+        <div class="personal-acciones">
+            <a href="{{ url_for('nuevo_personal', tipo='medico') }}" class="personal-btn guardar">
+                + Registrar médico
+            </a>
+
+            <a href="{{ url_for('nuevo_personal', tipo='enfermero') }}" class="personal-btn secundario">
+                + Registrar enfermero
+            </a>
+        </div>
+    </div>
+
+    <section class="personal-seccion">
+        <div class="personal-titulo">
+            <h2>Médicos</h2>
+            <span>{{ medicos|length }} registrados</span>
+        </div>
+
+        <div class="personal-tabla-contenedor">
+            <table class="personal-tabla">
+                <thead>
+                    <tr>
+                        <th>Nombre completo</th>
+                        <th>Especialidad</th>
+                        <th>No. colegiado</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for medico in medicos %}
+                    <tr>
+                        <td>{{ medico.nombres }} {{ medico.apellidos }}</td>
+                        <td>{{ medico.especialidad }}</td>
+                        <td>{{ medico.colegiado or 'No registrado' }}</td>
+                        <td>{{ medico.telefono or 'No registrado' }}</td>
+                        <td>{{ medico.correo or 'No registrado' }}</td>
+                        <td>
+                            {% if medico.estado %}
+                            <span class="personal-estado activo">Activo</span>
+                            {% else %}
+                            <span class="personal-estado inactivo">Inactivo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="personal-vacio">
+                            No hay médicos registrados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <section class="personal-seccion">
+        <div class="personal-titulo">
+            <h2>Personal de enfermería</h2>
+            <span>{{ enfermeros|length }} registrados</span>
+        </div>
+
+        <div class="personal-tabla-contenedor">
+            <table class="personal-tabla">
+                <thead>
+                    <tr>
+                        <th>Nombre completo</th>
+                        <th>Teléfono</th>
+                        <th>Correo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for enfermero in enfermeros %}
+                    <tr>
+                        <td>{{ enfermero.nombres }} {{ enfermero.apellidos }}</td>
+                        <td>{{ enfermero.telefono or 'No registrado' }}</td>
+                        <td>{{ enfermero.correo or 'No registrado' }}</td>
+                        <td>
+                            {% if enfermero.estado %}
+                            <span class="personal-estado activo">Activo</span>
+                            {% else %}
+                            <span class="personal-estado inactivo">Inactivo</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="personal-vacio">
+                            No hay personal de enfermería registrado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

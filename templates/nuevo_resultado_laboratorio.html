@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block titulo %}Registrar resultado de laboratorio{% endblock %}
+
+{% block contenido %}
+<div class="laboratorio-formulario-panel">
+    <h1 class="laboratorio-formulario-titulo">
+        Registrar resultado de laboratorio
+    </h1>
+
+    <p>
+        Selecciona la visita médica y el examen al que corresponde el resultado.
+    </p>
+
+    <form method="POST" class="laboratorio-formulario">
+
+        <div class="laboratorio-campo-formulario">
+            <label for="id_visita">Residente y visita médica</label>
+
+            <select id="id_visita" name="id_visita" required>
+                <option value="">Selecciona una visita</option>
+
+                {% for visita in visitas %}
+                <option value="{{ visita.id_visita }}">
+                    {{ visita.apellidos }}, {{ visita.nombres }}
+                    — Dr. {{ visita.nombres_medico }} {{ visita.apellidos_medico }}
+                    — {{ visita.fecha_visita }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="laboratorio-campo-formulario">
+            <label for="id_examen">Examen de laboratorio</label>
+
+            <select id="id_examen" name="id_examen" required>
+                <option value="">Selecciona un examen</option>
+
+                {% for examen in examenes %}
+                <option value="{{ examen.id_examen }}">
+                    {{ examen.nombre }} — Q{{ "%.2f"|format(examen.precio) }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="laboratorio-campo-formulario">
+            <label for="resultado">Resultado</label>
+            <textarea id="resultado" name="resultado" rows="5" maxlength="10000" required></textarea>
+        </div>
+
+        <div class="laboratorio-campo-formulario">
+            <label for="observaciones">Observaciones</label>
+            <textarea id="observaciones" name="observaciones" rows="3" maxlength="10000"></textarea>
+        </div>
+
+        <div class="laboratorio-formulario-acciones">
+            <a href="{{ url_for('laboratorio') }}" class="laboratorio-btn-cancelar">
+                Cancelar
+            </a>
+
+            <button type="submit" class="laboratorio-btn-guardar">
+                Guardar resultado
+            </button>
+        </div>
+
+    </form>
+</div>
+{% endblock %}

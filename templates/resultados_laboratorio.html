@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block titulo %}Resultados de laboratorio - Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+
+<div class="laboratorio-contenedor">
+
+    <div class="laboratorio-encabezado">
+        <div>
+            <span class="laboratorio-etiqueta">ÁREA MÉDICA</span>
+            <h1>Resultados de laboratorio</h1>
+            <p>Consulta los resultados de los exámenes realizados a los residentes.</p>
+        </div>
+
+        <div class="laboratorio-acciones-superiores">
+            <a href="{{ url_for('nuevo_resultado_laboratorio') }}" class="laboratorio-btn-nuevo">
+                <span>+</span> Registrar resultado
+            </a>
+
+            <a href="{{ url_for('laboratorio') }}" class="laboratorio-btn-secundario">
+                Volver a Laboratorio
+            </a>
+        </div>
+    </div>
+
+    <div class="laboratorio-formulario-panel">
+        <div class="laboratorio-formulario-titulo">
+            <h2>Historial de resultados</h2>
+            <p>Resultados registrados en el sistema.</p>
+        </div>
+
+        <div class="laboratorio-tabla-contenedor">
+            <table class="laboratorio-tabla">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Residente</th>
+                        <th>Examen</th>
+                        <th>Médico</th>
+                        <th>Resultado</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for resultado in resultados %}
+                    <tr>
+                        <td>
+                            {{ resultado.fecha_examen.strftime('%d/%m/%Y %H:%M')
+                            if resultado.fecha_examen else 'Sin fecha' }}
+                        </td>
+
+                        <td>
+                            {{ resultado.nombres_interno }}
+                            {{ resultado.apellidos_interno }}
+                        </td>
+
+                        <td>{{ resultado.nombre_examen }}</td>
+
+                        <td>
+                            {{ resultado.nombres_medico }}
+                            {{ resultado.apellidos_medico }}
+                        </td>
+
+                        <td class="resultado-texto">
+                            {{ resultado.resultado }}
+                        </td>
+
+                        <td>
+                            {{ resultado.observaciones or 'Sin observaciones' }}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6" class="laboratorio-tabla-vacia">
+                            Todavía no hay resultados de laboratorio registrados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

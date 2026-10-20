@@ -1,0 +1,128 @@
+```html
+{% extends "base.html" %}
+
+{% block titulo %}
+Residentes - Asilo Cabeza de Algodón
+{% endblock %}
+
+{% block contenido %}
+
+<!-- ENCABEZADO -->
+<div class="pagina-encabezado">
+    <div>
+        <span class="etiqueta-seccion">GESTIÓN</span>
+        <h2>Residentes</h2>
+        <p>Administración de los adultos mayores registrados en el asilo.</p>
+    </div>
+
+    <a href="{{ url_for('nuevo_residente') }}" class="btn-principal">
+        + Nuevo residente
+    </a>
+</div>
+
+<!-- ESTADÍSTICAS -->
+<div class="estadistica-residentes">
+    <div class="estadistica-icono">♙</div>
+    <div>
+        <span>Total de residentes registrados</span>
+        <strong>{{ internos | length }}</strong>
+    </div>
+</div>
+
+<!-- LISTADO DE RESIDENTES -->
+<div class="panel-contenido" id="listado-residentes">
+
+    <div class="panel-titulo">
+        <div>
+            <h3>Residentes registrados</h3>
+            <p>Información almacenada en la base de datos.</p>
+        </div>
+
+        <span class="contador">
+            {{ internos | length }} registros
+        </span>
+    </div>
+
+    <!-- BÚSQUEDA -->
+    <form method="GET" action="{{ url_for('residentes') }}" class="busqueda-residentes">
+
+        <div class="campo-busqueda">
+            <label for="busqueda">Buscar residente</label>
+
+            <input type="text" id="busqueda" name="busqueda" value="{{ busqueda }}"
+                placeholder="Buscar por nombre o apellido...">
+        </div>
+
+        <button type="submit" class="btn-principal">
+            Buscar
+        </button>
+
+        {% if busqueda %}
+        <a href="{{ url_for('residentes') }}" class="btn-secundario">
+            Limpiar
+        </a>
+        {% endif %}
+
+    </form>
+
+    <!-- TABLA -->
+    <div class="tabla-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre completo</th>
+                    <th>Fecha de nacimiento</th>
+                    <th>Fecha de ingreso</th>
+                    <th>Género</th>
+                    <th>Diagnóstico</th>
+                    <th>Estado</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for interno in internos %}
+                <tr>
+                    <td>{{ interno.id_interno }}</td>
+
+                    <td class="nombre-tabla">
+                        {{ interno.nombres }} {{ interno.apellidos }}
+                    </td>
+
+                    <td>{{ interno.fecha_nacimiento }}</td>
+                    <td>{{ interno.fecha_ingreso }}</td>
+                    <td>{{ interno.genero or 'No especificado' }}</td>
+
+                    <td>
+                        {{ interno.diagnostico_ingreso or 'Sin diagnóstico registrado' }}
+                    </td>
+
+                    <td>
+                        <span class="estado-activo">
+                            {{ interno.estado }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <a href="{{ url_for('editar_residente', id_interno=interno.id_interno) }}" class="btn-tabla">
+                            Editar
+                        </a>
+                    </td>
+                </tr>
+
+                {% else %}
+                <tr>
+                    <td colspan="8" class="tabla-vacia">
+                        No hay residentes registrados.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+{% endblock %}
+```

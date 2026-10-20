@@ -1,0 +1,101 @@
+{% extends "base.html" %}
+
+{% block titulo %}Historial médico - Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+<div class="medicamentos-pagina">
+
+    <div class="medicamentos-encabezado">
+        <div>
+            <span class="etiqueta-seccion">GESTIÓN MÉDICA</span>
+            <h2>Historial médico</h2>
+            <p>Consulta los antecedentes y las visitas médicas de cada residente.</p>
+        </div>
+    </div>
+
+    <section class="medicamentos-panel">
+        <h3>Buscar residente</h3>
+        <p class="medicamentos-descripcion">
+            Escribe el nombre o apellido del residente que deseas consultar.
+        </p>
+
+        <form method="GET" action="{{ url_for('historial_medico') }}">
+            <div class="medicamentos-busqueda">
+                <div class="campo-formulario">
+                    <label for="busqueda">Nombre o apellido</label>
+                    <input type="text" id="busqueda" name="busqueda" value="{{ busqueda }}"
+                        placeholder="Ej. José González">
+                </div>
+
+                <div class="medicamentos-acciones">
+                    <button type="submit" class="btn btn-primario">
+                        Buscar
+                    </button>
+                    <a href="{{ url_for('historial_medico') }}" class="btn btn-secundario">
+                        Limpiar
+                    </a>
+                </div>
+            </div>
+        </form>
+    </section>
+
+    <section class="medicamentos-panel">
+        <h3>Residentes registrados</h3>
+        <p class="medicamentos-descripcion">
+            Resultados encontrados: {{ residentes|length }}
+        </p>
+
+        {% if residentes %}
+        <div class="medicamentos-tabla-contenedor">
+            <table class="medicamentos-tabla">
+                <thead>
+                    <tr>
+                        <th>Residente</th>
+                        <th>Fecha de nacimiento</th>
+                        <th>Estado</th>
+                        <th>Acción</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for residente in residentes %}
+                    <tr>
+                        <td>
+                            <span class="medicamentos-nombre">
+                                {{ residente.nombres }} {{ residente.apellidos }}
+                            </span>
+                        </td>
+
+                        <td>
+                            {{ residente.fecha_nacimiento.strftime('%d/%m/%Y') }}
+                        </td>
+
+                        <td>
+                            {{ residente.estado }}
+                        </td>
+
+                        <td>
+                            <a href="{{ url_for('detalle_historial_medico', id_interno=residente.id_interno) }}"
+                                class="btn btn-secundario">
+                                Ver historial
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="medicamentos-vacio">
+            <strong>No se encontraron residentes</strong>
+            {% if busqueda %}
+            Prueba con otro nombre o apellido.
+            {% else %}
+            Todavía no hay residentes registrados.
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}
