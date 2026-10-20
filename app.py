@@ -2421,7 +2421,245 @@ def resultados_laboratorio():
     finally:
         cursor.close()
         conexion.close()
-        
+
+# =========================================================
+# MODULO DE FACTURACION Y FINANZAS
+# =========================================================
+
+@app.route("/finanzas")
+@requiere_rol("Administrador", "Contador")
+def finanzas():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                COALESCE((
+                    SELECT SUM(monto)
+                    FROM donaciones
+                ), 0) AS total_donaciones,
+                COALESCE((
+                    SELECT SUM(monto)
+                    FROM pagos_fundacion
+                ), 0) AS total_pagos_fundacion,
+                COALESCE((
+                    SELECT SUM(monto)
+                    FROM pagos_familiares
+                ), 0) AS total_pagos_familiares,
+                COALESCE((
+                    SELECT SUM(monto)
+                    FROM gastos
+                ), 0) AS total_gastos
+        """)
+
+        resumen = cursor.fetchone()
+
+        ingresos = (
+            float(resumen["total_donaciones"])
+            + float(resumen["total_pagos_fundacion"])
+            + float(resumen["total_pagos_familiares"])
+        )
+
+        egresos = float(resumen["total_gastos"])
+
+        resumen["total_ingresos"] = ingresos
+        resumen["total_gastos"] = egresos
+        resumen["balance"] = ingresos - egresos
+
+        cursor.execute("""
+            SELECT
+                c.id_cuota,
+                c.fecha_inicio,
+                c.fecha_fin,
+                c.monto,
+                c.estado,
+                i.nombres,
+                i.apellidos,
+                COALESCE(SUM(p.monto), 0) AS total_pagado
+            FROM cuotas_mensuales c
+            INNER JOIN internos i
+                ON i.id_interno = c.id_interno
+            LEFT JOIN pagos_familiares p
+                ON p.id_cuota = c.id_cuota
+            GROUP BY
+                c.id_cuota,
+                c.fecha_inicio,
+                c.fecha_fin,
+                c.monto,
+                c.estado,
+                i.nombres,
+                i.apellidos
+            ORDER BY c.fecha_inicio DESC
+            LIMIT 10
+        """)
+
+        cuotas_recientes = cursor.fetchall()
+
+        for cuota in cuotas_recientes:
+            cuota["monto"] = float(cuota["monto"])
+            cuota["total_pagado"] = float(cuota["total_pagado"])
+            cuota["saldo"] = max(
+                0,
+                cuota["monto"] - cuota["total_pagado"]
+            )
+
+        return render_template(
+            "finanzas.html",
+            resumen=resumen,
+            cuotas_recientes=cuotas_recientes
+        )
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+# ---------------------------------------------------------
+# CONSULTA DE CUOTAS MENSUALES Y SALDOS DE RESIDENTES
+# ---------------------------------------------------------
+@app.route("/finanzas/cuotas")
+@requiere_rol("Administrador", "Contador")
+def finanzas_cuotas():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                c.id_cuota,
+                c.fecha_inicio,
+                c.fecha_fin,
+                c.monto,
+                c.estado,
+                i.id_interno,
+                i.nombres,
+                i.apellidos,
+                COALESCE(SUM(p.monto), 0) AS total_pagado
+            FROM cuotas_mensuales c
+            INNER JOIN internos i
+                ON i.id_interno = c.id_interno
+            LEFT JOIN pagos_familiares p
+                ON p.id_cuota = c.id_cuota
+            GROUP BY
+                c.id_cuota,
+                c.fecha_inicio,
+                c.fecha_fin,
+                c.monto,
+                c.estado,
+                i.id_interno,
+                i.nombres,
+                i.apellidos
+            ORDER BY c.fecha_inicio DESC
+        """)
+
+        cuotas = cursor.fetchall()
+
+        for cuota in cuotas:
+            cuota["monto"] = float(cuota["monto"])
+            cuota["total_pagado"] = float(cuota["total_pagado"])
+            cuota["saldo"] = max(
+                0,
+                cuota["monto"] - cuota["total_pagado"]
+            )
+
+        return render_template("finanzas_cuotas.html", cuotas=cuotas)
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+# ---------------------------------------------------------
+# REGISTRO DE CUOTAS MENSUALES DE RESIDENTES
+# ---------------------------------------------------------
+@app.route("/finanzas/cuotas/nueva", methods=["GET", "POST"])
+@requiere_rol("Administrador", "Contador")
+def finanzas_cuota_nueva():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT id_interno, nombres, apellidos
+            FROM internos
+            WHERE estado = 'Activo'
+            ORDER BY apellidos, nombres
+        """)
+        residentes = cursor.fetchall()
+
+        if request.method == "POST":
+            id_interno = request.form.get("id_interno", "").strip()
+            fecha_inicio = request.form.get("fecha_inicio", "").strip()
+            fecha_fin = request.form.get("fecha_fin", "").strip()
+            monto = request.form.get("monto", "").strip()
+
+            try:
+                id_interno = int(id_interno)
+                fecha_inicio_valida = datetime.strptime(
+                    fecha_inicio, "%Y-%m-%d"
+                ).date()
+                fecha_fin_valida = datetime.strptime(
+                    fecha_fin, "%Y-%m-%d"
+                ).date()
+                monto_valido = float(monto)
+
+                if monto_valido <= 0:
+                    raise ValueError
+
+                if fecha_fin_valida < fecha_inicio_valida:
+                    flash(
+                        "La fecha final no puede ser anterior a la inicial.",
+                        "error"
+                    )
+                    return render_template(
+                        "finanzas_cuota_nueva.html",
+                        residentes=residentes
+                    )
+
+                cursor.execute("""
+                    SELECT id_interno
+                    FROM internos
+                    WHERE id_interno = %s AND estado = 'Activo'
+                """, (id_interno,))
+
+                if not cursor.fetchone():
+                    flash("Selecciona un residente activo válido.", "error")
+                    return render_template(
+                        "finanzas_cuota_nueva.html",
+                        residentes=residentes
+                    )
+
+                cursor.execute("""
+                    INSERT INTO cuotas_mensuales
+                        (id_interno, fecha_inicio, fecha_fin, monto, estado)
+                    VALUES (%s, %s, %s, %s, 'Pendiente')
+                """, (
+                    id_interno,
+                    fecha_inicio_valida,
+                    fecha_fin_valida,
+                    monto_valido
+                ))
+
+                conexion.commit()
+
+                flash("La cuota mensual se registró correctamente.", "success")
+                return redirect(url_for("finanzas_cuotas"))
+
+            except (ValueError, TypeError):
+                flash(
+                    "Verifica los datos. El monto debe ser mayor que cero "
+                    "y las fechas deben ser válidas.",
+                    "error"
+                )
+
+        return render_template(
+            "finanzas_cuota_nueva.html",
+            residentes=residentes
+        )
+
+    finally:
+        cursor.close()
+        conexion.close()
+
 # =========================================================
 # CERRAR SESIÓN
 # =========================================================

@@ -115,14 +115,16 @@ Panel principal - Asilo Cabeza de Algodón
 
     {% endif %}
 
+
     <!-- FACTURACIÓN Y REPORTES -->
     {% if rol in ['Administrador', 'Contador'] %}
-    <div class="dashboard-card card-pendiente">
-        <div class="card-icon naranja">Ｑ</div>
-        <h4>Facturación</h4>
-        <p>Control de cobros, pagos y movimientos.</p>
-        <span class="card-link">Próximamente</span>
-    </div>
+
+    <a href="{{ url_for('finanzas') }}" class="dashboard-card">
+        <div class="card-icon naranja">Q</div>
+        <h4>Facturación y Finanzas</h4>
+        <p>Consulta ingresos, gastos, balance y cuotas familiares.</p>
+        <span class="card-link">Abrir módulo →</span>
+    </a>
 
     <div class="dashboard-card card-pendiente">
         <div class="card-icon verde">▥</div>
@@ -130,6 +132,7 @@ Panel principal - Asilo Cabeza de Algodón
         <p>Consulta de información administrativa y médica.</p>
         <span class="card-link">Próximamente</span>
     </div>
+
     {% endif %}
 
 </div>

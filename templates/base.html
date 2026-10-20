@@ -119,11 +119,11 @@
             <div class="sidebar-section">
                 <span class="sidebar-label">ADMINISTRACIÓN</span>
 
-                <div class="sidebar-link deshabilitado">
-                    <span class="menu-icon">Ｑ</span>
-                    <span>Facturación</span>
-                    <small>Próximamente</small>
-                </div>
+                <a href="{{ url_for('finanzas') }}"
+                    class="sidebar-link {% if request.endpoint in ['finanzas', 'finanzas_cuotas', 'finanzas_cuota_nueva'] %}activo{% endif %}">
+                    <span class="menu-icon">Q</span>
+                    <span>Facturación y Finanzas</span>
+                </a>
 
                 <div class="sidebar-link deshabilitado">
                     <span class="menu-icon">▥</span>

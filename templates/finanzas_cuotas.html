@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block titulo %}Cuotas familiares | Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+<div class="contenido-principal">
+
+    <div class="encabezado-pagina">
+        <div>
+            <h1>Cuotas familiares</h1>
+            <p>Consulta los montos, pagos y saldos de cada residente.</p>
+        </div>
+
+        <div class="acciones-encabezado">
+            <a href="{{ url_for('finanzas_cuota_nueva') }}" class="boton-accion">
+                Registrar cuota
+            </a>
+
+            <a href="{{ url_for('finanzas') }}" class="boton-secundario">
+                Volver a Finanzas
+            </a>
+        </div>
+    </div>
+
+    <section class="seccion-panel">
+        {% if cuotas %}
+        <div class="tabla-contenedor">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Residente</th>
+                        <th>Periodo inicial</th>
+                        <th>Periodo final</th>
+                        <th>Monto</th>
+                        <th>Pagado</th>
+                        <th>Saldo</th>
+                        <th>Estado</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for cuota in cuotas %}
+                    <tr>
+                        <td>{{ cuota.id_cuota }}</td>
+                        <td>{{ cuota.nombres }} {{ cuota.apellidos }}</td>
+                        <td>{{ cuota.fecha_inicio.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ cuota.fecha_fin.strftime('%d/%m/%Y') }}</td>
+                        <td>Q {{ "%.2f"|format(cuota.monto) }}</td>
+                        <td>Q {{ "%.2f"|format(cuota.total_pagado) }}</td>
+                        <td>Q {{ "%.2f"|format(cuota.saldo) }}</td>
+                        <td>{{ cuota.estado }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>No hay cuotas registradas en el sistema.</p>
+        {% endif %}
+    </section>
+</div>
+{% endblock %}

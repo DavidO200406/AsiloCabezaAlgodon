@@ -1,0 +1,93 @@
+{% extends "base.html" %}
+
+{% block titulo %}Facturación y Finanzas | Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+
+<div class="contenido-principal finanzas-pagina">
+
+    <div class="pagina-encabezado">
+        <div>
+            <span class="etiqueta-seccion">ADMINISTRACIÓN</span>
+            <h2>Facturación y Finanzas</h2>
+            <p>Resumen de los movimientos económicos del asilo.</p>
+        </div>
+    </div>
+
+    <!-- RESUMEN FINANCIERO -->
+    <div class="tarjetas-estadisticas finanzas-estadisticas">
+
+        <div class="tarjeta-estadistica">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Ingresos registrados</span>
+                <span class="finanzas-icono verde">+</span>
+            </div>
+            <p class="valor-estadistica">
+                Q {{ "{:,.2f}".format(resumen.total_ingresos) }}
+            </p>
+            <span class="finanzas-descripcion">
+                Total de ingresos registrados
+            </span>
+        </div>
+
+        <div class="tarjeta-estadistica">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Gastos registrados</span>
+                <span class="finanzas-icono rojo">−</span>
+            </div>
+            <p class="valor-estadistica">
+                Q {{ "{:,.2f}".format(resumen.total_gastos) }}
+            </p>
+            <span class="finanzas-descripcion">
+                Total de gastos registrados
+            </span>
+        </div>
+
+        <div class="tarjeta-estadistica">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Balance</span>
+                <span class="finanzas-icono azul">Q</span>
+            </div>
+            <p class="valor-estadistica">
+                Q {{ "{:,.2f}".format(resumen.balance) }}
+            </p>
+            <span class="finanzas-descripcion">
+                Diferencia entre ingresos y gastos
+            </span>
+        </div>
+
+        <div class="tarjeta-estadistica">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Donaciones</span>
+                <span class="finanzas-icono naranja">+</span>
+            </div>
+            <p class="valor-estadistica">
+                Q {{ "{:,.2f}".format(resumen.total_donaciones) }}
+            </p>
+            <span class="finanzas-descripcion">
+                Total de donaciones registradas
+            </span>
+        </div>
+
+    </div>
+
+    <!-- ACCESO A CUOTAS FAMILIARES -->
+    <section class="seccion-panel finanzas-accesos">
+        <div>
+            <span class="etiqueta-seccion">GESTIÓN DE COBROS</span>
+            <h3>Cuotas familiares</h3>
+            <p>
+                Consulta las cuotas de los residentes, los pagos recibidos
+                y los saldos pendientes.
+            </p>
+        </div>
+
+        <a href="{{ url_for('finanzas_cuotas') }}" class="boton-accion">
+            Consultar cuotas familiares
+            <span aria-hidden="true">→</span>
+        </a>
+    </section>
+
+</div>
+
+{% endblock %}

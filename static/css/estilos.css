@@ -2875,3 +2875,333 @@ tr:hover td {
         font-size: 12px;
     }
 }
+
+/* Finanzas: formularios y acciones */
+
+.acciones-financieras,
+.acciones-encabezado,
+.acciones-formulario {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
+}
+
+.acciones-financieras {
+    margin-top: 20px;
+}
+
+.acciones-encabezado {
+    justify-content: flex-end;
+}
+
+.formulario-panel {
+    max-width: 850px;
+    margin-top: 24px;
+}
+
+.formulario-datos {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.campos-en-fila {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.campo-formulario {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.campo-formulario label {
+    font-weight: 600;
+    color: #344054;
+}
+
+.campo-formulario input,
+.campo-formulario select {
+    width: 100%;
+    min-height: 44px;
+    padding: 10px 12px;
+    border: 1px solid #d0d5dd;
+    border-radius: 8px;
+    background: #fff;
+    font: inherit;
+}
+
+.campo-formulario input:focus,
+.campo-formulario select:focus {
+    outline: none;
+    border-color: #438a78;
+    box-shadow: 0 0 0 3px rgba(67, 138, 120, 0.14);
+}
+
+.acciones-formulario {
+    justify-content: flex-end;
+    margin-top: 8px;
+}
+
+.mensaje-alerta {
+    padding: 12px 16px;
+    margin-bottom: 18px;
+    border-radius: 8px;
+}
+
+.mensaje-success {
+    color: #166534;
+    background: #dcfce7;
+}
+
+.mensaje-error {
+    color: #991b1b;
+    background: #fee2e2;
+}
+
+@media (max-width: 650px) {
+    .campos-en-fila {
+        grid-template-columns: 1fr;
+    }
+
+    .acciones-encabezado {
+        justify-content: flex-start;
+    }
+}
+
+/* =========================================================
+   BOTONES DEL MODULO DE FACTURACION Y FINANZAS
+   ========================================================= */
+
+.acciones-financieras {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 14px;
+    margin-top: 22px;
+}
+
+.acciones-financieras a,
+.acciones-encabezado a,
+.acciones-formulario a,
+.acciones-formulario button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    padding: 11px 20px;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color 0.2s ease,
+        color 0.2s ease,
+        box-shadow 0.2s ease,
+        transform 0.2s ease;
+}
+
+/* Botón principal */
+.acciones-financieras .boton-accion,
+.acciones-encabezado .boton-accion,
+.acciones-formulario .boton-accion {
+    background-color: #267a65;
+    color: #ffffff;
+    border: 1px solid #267a65;
+}
+
+/* Efecto al pasar el cursor */
+.acciones-financieras .boton-accion:hover,
+.acciones-encabezado .boton-accion:hover,
+.acciones-formulario .boton-accion:hover {
+    background-color: #1e6252;
+    border-color: #1e6252;
+    box-shadow: 0 4px 10px rgba(38, 122, 101, 0.2);
+    transform: translateY(-1px);
+}
+
+/* Botón secundario */
+.acciones-financieras .boton-secundario,
+.acciones-encabezado .boton-secundario,
+.acciones-formulario .boton-secundario {
+    background-color: #ffffff;
+    color: #344054;
+    border: 1px solid #d0d5dd;
+}
+
+/* Efecto del botón secundario */
+.acciones-financieras .boton-secundario:hover,
+.acciones-encabezado .boton-secundario:hover,
+.acciones-formulario .boton-secundario:hover {
+    background-color: #f2f6f5;
+    color: #267a65;
+    border-color: #267a65;
+}
+
+/* Adaptación a pantallas pequeñas */
+@media (max-width: 600px) {
+    .acciones-financieras {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .acciones-financieras a {
+        width: 100%;
+    }
+}
+
+/* =========================================================
+   PANEL PRINCIPAL DE FACTURACION Y FINANZAS
+   ========================================================= */
+
+.finanzas-pagina {
+    width: 100%;
+}
+
+.finanzas-pagina .pagina-encabezado {
+    margin-bottom: 26px;
+}
+
+.finanzas-estadisticas {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 20px;
+    margin-bottom: 28px;
+}
+
+.finanzas-estadisticas .tarjeta-estadistica {
+    min-width: 0;
+    padding: 23px;
+    background: #ffffff;
+    border: 1px solid #e6ebe9;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(28, 55, 47, 0.04);
+}
+
+.finanzas-tarjeta-encabezado {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    color: #596761;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+.finanzas-icono {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    flex-shrink: 0;
+    border-radius: 10px;
+    font-size: 20px;
+    font-weight: 700;
+}
+
+.finanzas-icono.verde {
+    color: #237a5a;
+    background: #e4f5ec;
+}
+
+.finanzas-icono.rojo {
+    color: #b54747;
+    background: #fceaea;
+}
+
+.finanzas-icono.azul {
+    color: #3568a8;
+    background: #e9f1fc;
+}
+
+.finanzas-icono.naranja {
+    color: #a85c19;
+    background: #fff0df;
+}
+
+.finanzas-estadisticas .valor-estadistica {
+    margin: 19px 0 9px;
+    color: #233b32;
+    font-size: clamp(21px, 2vw, 28px);
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+
+.finanzas-descripcion {
+    color: #7b8781;
+    font-size: 12px;
+}
+
+.finanzas-accesos {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 26px;
+    background: #ffffff;
+    border: 1px solid #e6ebe9;
+    border-radius: 14px;
+    box-shadow: 0 4px 14px rgba(28, 55, 47, 0.04);
+}
+
+.finanzas-accesos h3 {
+    margin: 9px 0;
+    color: #263c33;
+    font-size: 19px;
+}
+
+.finanzas-accesos p {
+    margin: 0;
+    color: #69766f;
+    font-size: 14px;
+    line-height: 1.6;
+}
+
+.finanzas-accesos .boton-accion {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    flex-shrink: 0;
+    padding: 13px 19px;
+    color: #ffffff;
+    background: #267a65;
+    border: 1px solid #267a65;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    text-decoration: none;
+    transition: background 0.2s ease, transform 0.2s ease;
+}
+
+.finanzas-accesos .boton-accion:hover {
+    background: #1e6252;
+    transform: translateY(-1px);
+}
+
+@media (max-width: 1100px) {
+    .finanzas-estadisticas {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 650px) {
+    .finanzas-estadisticas {
+        grid-template-columns: 1fr;
+    }
+
+    .finanzas-accesos {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .finanzas-accesos .boton-accion {
+        width: 100%;
+    }
+}
