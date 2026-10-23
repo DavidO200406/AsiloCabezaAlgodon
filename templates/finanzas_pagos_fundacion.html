@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block titulo %}Pagos de la Fundación | Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+<div class="contenido-principal finanzas-pagina">
+
+    <div class="pagina-encabezado">
+        <div>
+            <span class="etiqueta-seccion">ADMINISTRACIÓN</span>
+            <h2>Pagos de la fundación</h2>
+            <p>Consulta y administra los ingresos recibidos de la fundación.</p>
+        </div>
+
+        <div class="acciones-encabezado">
+            <a href="{{ url_for('finanzas') }}" class="boton-secundario">
+                Volver a Finanzas
+            </a>
+            <a href="{{ url_for('finanzas_pago_fundacion_nuevo') }}" class="boton-accion">
+                Registrar pago
+            </a>
+        </div>
+    </div>
+
+    <div class="tarjetas-estadisticas finanzas-estadisticas">
+        <div class="tarjeta-estadistica">
+            <span class="estadistica-etiqueta">Total recibido</span>
+            <h3>Q {{ "%.2f"|format(total) }}</h3>
+            <p>Acumulado de los pagos registrados</p>
+        </div>
+
+        <div class="tarjeta-estadistica">
+            <span class="estadistica-etiqueta">Pagos registrados</span>
+            <h3>{{ pagos|length }}</h3>
+            <p>Registros encontrados</p>
+        </div>
+    </div>
+
+    <section class="seccion-tabla">
+        <div class="seccion-tabla-encabezado">
+            <div>
+                <h3>Historial de pagos</h3>
+                <p>Detalle de los ingresos recibidos de la fundación.</p>
+            </div>
+        </div>
+
+        <div class="tabla-contenedor">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Concepto</th>
+                        <th>Referencia</th>
+                        <th>Monto</th>
+                        <th>Observaciones</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for pago in pagos %}
+                    <tr>
+                        <td>
+                            {{ pago.fecha_pago.strftime('%d/%m/%Y %H:%M') }}
+                        </td>
+                        <td>{{ pago.concepto }}</td>
+                        <td>{{ pago.referencia or 'Sin referencia' }}</td>
+                        <td>Q {{ "%.2f"|format(pago.monto) }}</td>
+                        <td>{{ pago.observaciones or 'Sin observaciones' }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5">
+                            No hay pagos de la fundación registrados.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+{% endblock %}

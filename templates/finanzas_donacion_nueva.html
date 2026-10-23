@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block titulo %}Registrar donación | Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+<div class="contenido-principal">
+
+    <div class="encabezado-pagina">
+        <div>
+            <h1>Registrar donación</h1>
+            <p>Ingresa los datos de la donación recibida por el asilo.</p>
+        </div>
+
+        <a href="{{ url_for('finanzas_donaciones') }}" class="boton-secundario">
+            Volver a donaciones
+        </a>
+    </div>
+
+    <section class="seccion-panel formulario-panel">
+
+        <form method="POST" action="{{ url_for('finanzas_donacion_nueva') }}">
+
+            <div class="formulario-datos">
+
+                <div class="campo-formulario">
+                    <label for="nombre_donante">Nombre del donante</label>
+                    <input type="text" id="nombre_donante" name="nombre_donante" maxlength="150"
+                        value="{{ donacion.get('nombre_donante', '') }}" required>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="tipo_donante">Tipo de donante</label>
+                    <select id="tipo_donante" name="tipo_donante" required>
+                        <option value="">Selecciona una opción</option>
+
+                        {% for tipo in ['Persona', 'Empresa', 'Organización', 'Anónimo', 'Otro'] %}
+                        <option value="{{ tipo }}" {% if donacion.get('tipo_donante', '' )==tipo %}selected{% endif %}>
+                            {{ tipo }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="fecha_donacion">Fecha de donación</label>
+                    <input type="date" id="fecha_donacion" name="fecha_donacion"
+                        value="{{ donacion.get('fecha_donacion', fecha_hoy) }}" required>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="monto">Monto recibido (Q)</label>
+                    <input type="number" id="monto" name="monto" min="0.01" max="99999999.99" step="0.01"
+                        value="{{ donacion.get('monto', '') }}" placeholder="Ej. 500.00" required>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="referencia">Referencia (opcional)</label>
+                    <input type="text" id="referencia" name="referencia" value="{{ donacion.get('referencia', '') }}"
+                        placeholder="Número de recibo o comprobante">
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="descripcion">Descripción (opcional)</label>
+                    <textarea id="descripcion" name="descripcion" rows="4"
+                        placeholder="Describe la finalidad o el detalle de la donación">{{ donacion.get('descripcion', '') }}</textarea>
+                </div>
+
+            </div>
+
+            <div class="acciones-formulario">
+                <button type="submit" class="boton-accion">
+                    Guardar donación
+                </button>
+
+                <a href="{{ url_for('finanzas_donaciones') }}" class="boton-secundario">
+                    Cancelar
+                </a>
+            </div>
+
+        </form>
+
+    </section>
+</div>
+{% endblock %}

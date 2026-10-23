@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block titulo %}Gastos | Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+<div class="contenido-principal">
+
+    <div class="encabezado-pagina">
+        <div>
+            <h1>Registro de gastos</h1>
+            <p>Consulta los gastos realizados por el asilo.</p>
+        </div>
+
+        <div class="acciones-encabezado">
+            <a href="{{ url_for('finanzas_gasto_nuevo') }}" class="boton-accion">
+                Registrar gasto
+            </a>
+
+            <a href="{{ url_for('finanzas') }}" class="boton-secundario">
+                Volver a Finanzas
+            </a>
+        </div>
+    </div>
+
+    <section class="seccion-panel">
+        <h3>Total de gastos registrados</h3>
+        <h2>Q {{ "{:,.2f}".format(total_gastos) }}</h2>
+    </section>
+
+    <section class="seccion-panel">
+        <h3>Historial de gastos</h3>
+
+        {% if gastos %}
+        <div class="tabla-contenedor">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Fecha</th>
+                        <th>Categoría</th>
+                        <th>Descripción</th>
+                        <th>Monto</th>
+                        <th>Proveedor</th>
+                        <th>Referencia</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for gasto in gastos %}
+                    <tr>
+                        <td>{{ gasto.id_gasto }}</td>
+                        <td>{{ gasto.fecha_gasto.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ gasto.categoria }}</td>
+                        <td>{{ gasto.descripcion }}</td>
+                        <td>Q {{ "{:,.2f}".format(gasto.monto) }}</td>
+                        <td>{{ gasto.proveedor or 'No especificado' }}</td>
+                        <td>{{ gasto.referencia or 'Sin referencia' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p>Aún no hay gastos registrados.</p>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

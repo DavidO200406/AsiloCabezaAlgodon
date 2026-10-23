@@ -6,6 +6,7 @@ from datetime import datetime
 import mysql.connector
 import os
 import math
+from decimal import Decimal, InvalidOperation
 
 load_dotenv()
 
@@ -2514,6 +2515,153 @@ def finanzas():
         cursor.close()
         conexion.close()
 
+# =========================================================
+# CONSULTAR PAGOS DE LA FUNDACION
+# =========================================================
+
+@app.route("/finanzas/pagos-fundacion")
+@requiere_rol("Administrador", "Contador")
+def finanzas_pagos_fundacion():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                id_pago,
+                fecha_pago,
+                monto,
+                concepto,
+                referencia,
+                observaciones
+            FROM pagos_fundacion
+            ORDER BY fecha_pago DESC
+        """)
+
+        pagos = cursor.fetchall()
+
+        cursor.execute("""
+            SELECT COALESCE(SUM(monto), 0) AS total
+            FROM pagos_fundacion
+        """)
+
+        resultado = cursor.fetchone()
+        total = float(resultado["total"])
+
+        for pago in pagos:
+            pago["monto"] = float(pago["monto"])
+
+        return render_template(
+            "finanzas_pagos_fundacion.html",
+            pagos=pagos,
+            total=total
+        )
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+# =========================================================
+# REGISTRAR PAGO DE LA FUNDACION
+# =========================================================
+
+@app.route("/finanzas/pagos-fundacion/nuevo", methods=["GET", "POST"])
+@requiere_rol("Administrador", "Contador")
+def finanzas_pago_fundacion_nuevo():
+    if request.method == "POST":
+        fecha_pago = request.form.get("fecha_pago", "").strip()
+        monto_texto = request.form.get("monto", "").strip()
+        concepto = request.form.get("concepto", "").strip()
+        referencia = request.form.get("referencia", "").strip()
+        observaciones = request.form.get("observaciones", "").strip()
+
+        try:
+            monto = float(monto_texto)
+
+            if monto <= 0:
+                raise ValueError
+
+        except (ValueError, TypeError):
+            return render_template(
+                "finanzas_pago_fundacion_nuevo.html",
+                error="Ingresa un monto válido mayor que cero.",
+                datos=request.form
+            )
+
+        if not concepto:
+            return render_template(
+                "finanzas_pago_fundacion_nuevo.html",
+                error="El concepto del pago es obligatorio.",
+                datos=request.form
+            )
+
+        if fecha_pago:
+            try:
+                fecha_pago = datetime.strptime(
+                    fecha_pago, "%Y-%m-%dT%H:%M"
+                ).strftime("%Y-%m-%d %H:%M:%S")
+            except ValueError:
+                return render_template(
+                    "finanzas_pago_fundacion_nuevo.html",
+                    error="La fecha del pago no es válida.",
+                    datos=request.form
+                )
+
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+
+        try:
+            if fecha_pago:
+                cursor.execute("""
+                    INSERT INTO pagos_fundacion (
+                        fecha_pago,
+                        monto,
+                        concepto,
+                        referencia,
+                        observaciones
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+                """, (
+                    fecha_pago,
+                    monto,
+                    concepto,
+                    referencia or None,
+                    observaciones or None
+                ))
+            else:
+                cursor.execute("""
+                    INSERT INTO pagos_fundacion (
+                        monto,
+                        concepto,
+                        referencia,
+                        observaciones
+                    )
+                    VALUES (%s, %s, %s, %s)
+                """, (
+                    monto,
+                    concepto,
+                    referencia or None,
+                    observaciones or None
+                ))
+
+            conexion.commit()
+
+        except Exception:
+            conexion.rollback()
+            raise
+
+        finally:
+            cursor.close()
+            conexion.close()
+
+        return redirect(url_for("finanzas_pagos_fundacion"))
+
+    return render_template(
+        "finanzas_pago_fundacion_nuevo.html",
+        error=None,
+        datos={}
+    )
+
 # ---------------------------------------------------------
 # CONSULTA DE CUOTAS MENSUALES Y SALDOS DE RESIDENTES
 # ---------------------------------------------------------
@@ -2659,6 +2807,470 @@ def finanzas_cuota_nueva():
     finally:
         cursor.close()
         conexion.close()
+
+# ---------------------------------------------------------
+# REGISTRO DE PAGOS FAMILIARES
+# ---------------------------------------------------------
+@app.route("/finanzas/cuotas/<int:id_cuota>/pago", methods=["GET", "POST"])
+@requiere_rol("Administrador", "Contador")
+def finanzas_registrar_pago(id_cuota):
+    conexion = obtener_conexion()
+    cursor = conexion.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                c.id_cuota,
+                c.id_interno,
+                c.fecha_inicio,
+                c.fecha_fin,
+                c.monto,
+                c.estado,
+                i.nombres,
+                i.apellidos,
+                COALESCE(SUM(p.monto), 0) AS total_pagado
+            FROM cuotas_mensuales c
+            INNER JOIN internos i
+                ON i.id_interno = c.id_interno
+            LEFT JOIN pagos_familiares p
+                ON p.id_cuota = c.id_cuota
+            WHERE c.id_cuota = %s
+            GROUP BY
+                c.id_cuota,
+                c.id_interno,
+                c.fecha_inicio,
+                c.fecha_fin,
+                c.monto,
+                c.estado,
+                i.nombres,
+                i.apellidos
+        """, (id_cuota,))
+
+        cuota = cursor.fetchone()
+
+        if not cuota:
+            flash("La cuota solicitada no existe.", "error")
+            return redirect(url_for("finanzas_cuotas"))
+
+        cuota["monto"] = Decimal(str(cuota["monto"]))
+        cuota["total_pagado"] = Decimal(str(cuota["total_pagado"]))
+        cuota["saldo"] = max(
+            Decimal("0.00"),
+            cuota["monto"] - cuota["total_pagado"]
+        )
+
+        cursor.execute("""
+            SELECT id_familiar, nombres, apellidos, parentesco,
+                   responsable_pago
+            FROM familiares
+            WHERE id_interno = %s
+            ORDER BY responsable_pago DESC, apellidos, nombres
+        """, (cuota["id_interno"],))
+
+        familiares = cursor.fetchall()
+
+        if request.method == "POST":
+            id_familiar = request.form.get("id_familiar", "").strip()
+            monto_texto = request.form.get("monto", "").strip()
+            metodo_pago = request.form.get("metodo_pago", "").strip()
+            referencia = request.form.get("referencia", "").strip()
+            observaciones = request.form.get("observaciones", "").strip()
+
+            try:
+                id_familiar = int(id_familiar)
+                monto_pago = Decimal(monto_texto)
+
+                if not monto_pago.is_finite() or monto_pago <= 0:
+                    raise InvalidOperation
+
+                if len(monto_pago.as_tuple().digits) > 12:
+                    raise InvalidOperation
+
+                if monto_pago.as_tuple().exponent < -2:
+                    raise InvalidOperation
+
+                metodos_validos = {
+                    "Efectivo",
+                    "Transferencia",
+                    "Tarjeta",
+                    "Depósito",
+                    "Otro"
+                }
+
+                if metodo_pago not in metodos_validos:
+                    flash("Selecciona un método de pago válido.", "error")
+                    return render_template(
+                        "finanzas_pago_nuevo.html",
+                        cuota=cuota,
+                        familiares=familiares
+                    )
+
+                cursor.execute("""
+                    SELECT id_familiar
+                    FROM familiares
+                    WHERE id_familiar = %s AND id_interno = %s
+                """, (id_familiar, cuota["id_interno"]))
+
+                if not cursor.fetchone():
+                    flash(
+                        "Selecciona un familiar del residente correspondiente.",
+                        "error"
+                    )
+                    return render_template(
+                        "finanzas_pago_nuevo.html",
+                        cuota=cuota,
+                        familiares=familiares
+                    )
+
+                if monto_pago > cuota["saldo"]:
+                    flash(
+                        "El pago no puede ser mayor que el saldo pendiente.",
+                        "error"
+                    )
+                    return render_template(
+                        "finanzas_pago_nuevo.html",
+                        cuota=cuota,
+                        familiares=familiares
+                    )
+
+                if cuota["saldo"] <= 0:
+                    flash("Esta cuota ya está pagada por completo.", "error")
+                    return redirect(url_for("finanzas_cuotas"))
+
+                cursor.execute("""
+                    INSERT INTO pagos_familiares
+                        (id_cuota, id_familiar, monto, metodo_pago,
+                         referencia, observaciones)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                """, (
+                    id_cuota,
+                    id_familiar,
+                    monto_pago,
+                    metodo_pago,
+                    referencia or None,
+                    observaciones or None
+                ))
+
+                nuevo_total = cuota["total_pagado"] + monto_pago
+
+                if nuevo_total >= cuota["monto"]:
+                    nuevo_estado = "Pagada"
+                else:
+                    nuevo_estado = "Parcial"
+
+                cursor.execute("""
+                    UPDATE cuotas_mensuales
+                    SET estado = %s
+                    WHERE id_cuota = %s
+                """, (nuevo_estado, id_cuota))
+
+                conexion.commit()
+
+                flash("El pago se registró correctamente.", "success")
+                return redirect(url_for("finanzas_cuotas"))
+
+            except (InvalidOperation, ValueError, TypeError):
+                flash(
+                    "Ingresa un monto válido con máximo dos decimales.",
+                    "error"
+                )
+
+        return render_template(
+            "finanzas_pago_nuevo.html",
+            cuota=cuota,
+            familiares=familiares
+        )
+
+    except Exception:
+        conexion.rollback()
+        raise
+
+    finally:
+        cursor.close()
+        conexion.close()
+# ---------------------------------------------------------
+# CONSULTA DE DONACIONES
+# ---------------------------------------------------------
+@app.route("/finanzas/donaciones")
+@requiere_rol("Administrador", "Contador")
+def finanzas_donaciones():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                id_donacion,
+                nombre_donante,
+                tipo_donante,
+                fecha_donacion,
+                monto,
+                descripcion,
+                referencia
+            FROM donaciones
+            ORDER BY fecha_donacion DESC, id_donacion DESC
+        """)
+
+        donaciones = cursor.fetchall()
+
+        total_donaciones = sum(
+            (Decimal(str(d["monto"])) for d in donaciones),
+            Decimal("0.00")
+        )
+
+        return render_template(
+            "finanzas_donaciones.html",
+            donaciones=donaciones,
+            total_donaciones=total_donaciones
+        )
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+# ---------------------------------------------------------
+# REGISTRO DE DONACIONES
+# ---------------------------------------------------------
+@app.route("/finanzas/donaciones/nueva", methods=["GET", "POST"])
+@requiere_rol("Administrador", "Contador")
+def finanzas_donacion_nueva():
+    if request.method == "POST":
+        nombre_donante = request.form.get("nombre_donante", "").strip()
+        tipo_donante = request.form.get("tipo_donante", "").strip()
+        fecha_texto = request.form.get("fecha_donacion", "").strip()
+        monto_texto = request.form.get("monto", "").strip()
+        descripcion = request.form.get("descripcion", "").strip()
+        referencia = request.form.get("referencia", "").strip()
+
+        formulario = request.form
+
+        try:
+            if not nombre_donante or not tipo_donante:
+                raise ValueError("Completa el nombre y el tipo de donante.")
+
+            if len(nombre_donante) > 150:
+                raise ValueError("El nombre del donante es demasiado largo.")
+
+            fecha_donacion = datetime.strptime(
+                fecha_texto, "%Y-%m-%d"
+            ).date()
+
+            monto = Decimal(monto_texto)
+
+            if not monto.is_finite() or monto <= 0:
+                raise ValueError("El monto debe ser mayor que cero.")
+
+            if monto > Decimal("99999999.99"):
+                raise ValueError("El monto supera el máximo permitido.")
+
+            if monto.as_tuple().exponent < -2:
+                raise ValueError("El monto admite un máximo de dos decimales.")
+
+        except (ValueError, InvalidOperation):
+            flash(
+                "Verifica los datos. La fecha debe ser válida y el monto "
+                "debe ser positivo, con un máximo de dos decimales.",
+                "error"
+            )
+
+            return render_template(
+                "finanzas_donacion_nueva.html",
+                fecha_hoy=datetime.now().date().isoformat(),
+                donacion=formulario
+            )
+
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+
+        try:
+            cursor.execute("""
+                INSERT INTO donaciones (
+                    nombre_donante,
+                    tipo_donante,
+                    fecha_donacion,
+                    monto,
+                    descripcion,
+                    referencia
+                )
+                VALUES (%s, %s, %s, %s, %s, %s)
+            """, (
+                nombre_donante,
+                tipo_donante,
+                fecha_donacion,
+                monto,
+                descripcion or None,
+                referencia or None
+            ))
+
+            conexion.commit()
+
+            flash("La donación se registró correctamente.", "success")
+
+            return redirect(url_for("finanzas_donaciones"))
+
+        except Exception:
+            conexion.rollback()
+            raise
+
+        finally:
+            cursor.close()
+            conexion.close()
+
+    return render_template(
+        "finanzas_donacion_nueva.html",
+        fecha_hoy=datetime.now().date().isoformat(),
+        donacion={}
+    )
+
+# ---------------------------------------------------------
+# CONSULTA DE GASTOS
+# ---------------------------------------------------------
+@app.route("/finanzas/gastos")
+@requiere_rol("Administrador", "Contador")
+def finanzas_gastos():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor(dictionary=True)
+
+    try:
+        cursor.execute("""
+            SELECT
+                id_gasto,
+                fecha_gasto,
+                categoria,
+                descripcion,
+                monto,
+                proveedor,
+                referencia,
+                observaciones
+            FROM gastos
+            ORDER BY fecha_gasto DESC, id_gasto DESC
+        """)
+
+        gastos = cursor.fetchall()
+
+        total_gastos = sum(
+            (Decimal(str(g["monto"])) for g in gastos),
+            Decimal("0.00")
+        )
+
+        return render_template(
+            "finanzas_gastos.html",
+            gastos=gastos,
+            total_gastos=total_gastos
+        )
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+# ---------------------------------------------------------
+# REGISTRO DE GASTOS
+# ---------------------------------------------------------
+@app.route("/finanzas/gastos/nuevo", methods=["GET", "POST"])
+@requiere_rol("Administrador", "Contador")
+def finanzas_gasto_nuevo():
+    categorias = [
+        "Alimentación",
+        "Medicamentos",
+        "Servicios básicos",
+        "Personal",
+        "Mantenimiento",
+        "Limpieza",
+        "Equipamiento",
+        "Otros"
+    ]
+
+    if request.method == "POST":
+        fecha_texto = request.form.get("fecha_gasto", "").strip()
+        categoria = request.form.get("categoria", "").strip()
+        descripcion = request.form.get("descripcion", "").strip()
+        monto_texto = request.form.get("monto", "").strip()
+        proveedor = request.form.get("proveedor", "").strip()
+        referencia = request.form.get("referencia", "").strip()
+        observaciones = request.form.get("observaciones", "").strip()
+
+        formulario = request.form
+
+        try:
+            if categoria not in categorias:
+                raise ValueError("Selecciona una categoría válida.")
+
+            if not descripcion:
+                raise ValueError("La descripción es obligatoria.")
+
+            fecha_gasto = datetime.strptime(
+                fecha_texto, "%Y-%m-%d"
+            ).date()
+
+            monto = Decimal(monto_texto)
+
+            if not monto.is_finite() or monto <= 0:
+                raise ValueError("El monto debe ser mayor que cero.")
+
+            if monto > Decimal("99999999.99"):
+                raise ValueError("El monto supera el máximo permitido.")
+
+            if monto.as_tuple().exponent < -2:
+                raise ValueError("El monto admite máximo dos decimales.")
+
+        except (ValueError, InvalidOperation):
+            flash(
+                "Verifica la fecha, categoría, descripción y monto.",
+                "error"
+            )
+
+            return render_template(
+                "finanzas_gasto_nuevo.html",
+                categorias=categorias,
+                fecha_hoy=datetime.now().date().isoformat(),
+                gasto=formulario
+            )
+
+        conexion = obtener_conexion()
+        cursor = conexion.cursor()
+
+        try:
+            cursor.execute("""
+                INSERT INTO gastos (
+                    fecha_gasto,
+                    categoria,
+                    descripcion,
+                    monto,
+                    proveedor,
+                    referencia,
+                    observaciones
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
+            """, (
+                fecha_gasto,
+                categoria,
+                descripcion,
+                monto,
+                proveedor or None,
+                referencia or None,
+                observaciones or None
+            ))
+
+            conexion.commit()
+
+            flash("El gasto se registró correctamente.", "success")
+
+            return redirect(url_for("finanzas_gastos"))
+
+        except Exception:
+            conexion.rollback()
+            raise
+
+        finally:
+            cursor.close()
+            conexion.close()
+
+    return render_template(
+        "finanzas_gasto_nuevo.html",
+        categorias=categorias,
+        fecha_hoy=datetime.now().date().isoformat(),
+        gasto={}
+    )
 
 # =========================================================
 # CERRAR SESIÓN

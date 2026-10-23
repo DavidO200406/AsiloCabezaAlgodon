@@ -36,6 +36,7 @@
                         <th>Pagado</th>
                         <th>Saldo</th>
                         <th>Estado</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
 
@@ -46,10 +47,20 @@
                         <td>{{ cuota.nombres }} {{ cuota.apellidos }}</td>
                         <td>{{ cuota.fecha_inicio.strftime('%d/%m/%Y') }}</td>
                         <td>{{ cuota.fecha_fin.strftime('%d/%m/%Y') }}</td>
-                        <td>Q {{ "%.2f"|format(cuota.monto) }}</td>
-                        <td>Q {{ "%.2f"|format(cuota.total_pagado) }}</td>
-                        <td>Q {{ "%.2f"|format(cuota.saldo) }}</td>
+                        <td>Q {{ "{:,.2f}".format(cuota.monto) }}</td>
+                        <td>Q {{ "{:,.2f}".format(cuota.total_pagado) }}</td>
+                        <td>Q {{ "{:,.2f}".format(cuota.saldo) }}</td>
                         <td>{{ cuota.estado }}</td>
+                        <td>
+                            {% if cuota.saldo > 0 %}
+                            <a href="{{ url_for('finanzas_registrar_pago', id_cuota=cuota.id_cuota) }}"
+                                class="boton-accion">
+                                Registrar pago
+                            </a>
+                            {% else %}
+                            <span>Pagada</span>
+                            {% endif %}
+                        </td>
                     </tr>
                     {% endfor %}
                 </tbody>

@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block titulo %}Registrar Pago de la Fundación | Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+<div class="contenido-principal finanzas-pagina">
+
+    <div class="pagina-encabezado">
+        <div>
+            <span class="etiqueta-seccion">ADMINISTRACIÓN</span>
+            <h2>Registrar pago de la fundación</h2>
+            <p>Ingresa los datos del dinero recibido por el asilo.</p>
+        </div>
+
+        <a href="{{ url_for('finanzas_pagos_fundacion') }}" class="boton-secundario">
+            Volver al historial
+        </a>
+    </div>
+
+    <section class="formulario-seccion">
+        <div class="formulario-encabezado">
+            <h3>Información del pago</h3>
+            <p>Los campos marcados con * son obligatorios.</p>
+        </div>
+
+        {% if error %}
+        <div class="mensaje-error" role="alert">
+            {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('finanzas_pago_fundacion_nuevo') }}" class="formulario-principal">
+
+            <div class="formulario-grid">
+
+                <div class="campo-formulario">
+                    <label for="fecha_pago">Fecha y hora del pago</label>
+                    <input type="datetime-local" id="fecha_pago" name="fecha_pago"
+                        value="{{ datos.get('fecha_pago', '') }}">
+                    <small>Si lo dejas vacío, se utilizará la fecha y hora actuales.</small>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="monto">Monto recibido (Q) *</label>
+                    <input type="number" id="monto" name="monto" min="0.01" step="0.01" required
+                        value="{{ datos.get('monto', '') }}" placeholder="Ej. 500.00">
+                </div>
+
+                <div class="campo-formulario campo-completo">
+                    <label for="concepto">Concepto del pago *</label>
+                    <input type="text" id="concepto" name="concepto" maxlength="255" required
+                        value="{{ datos.get('concepto', '') }}" placeholder="Describe el motivo del ingreso">
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="referencia">Referencia</label>
+                    <input type="text" id="referencia" name="referencia" maxlength="100"
+                        value="{{ datos.get('referencia', '') }}" placeholder="Ej. PF-002">
+                </div>
+
+                <div class="campo-formulario campo-completo">
+                    <label for="observaciones">Observaciones</label>
+                    <textarea id="observaciones" name="observaciones" rows="4"
+                        placeholder="Información adicional, si corresponde">{{ datos.get('observaciones', '') }}</textarea>
+                </div>
+
+            </div>
+
+            <div class="formulario-acciones">
+                <a href="{{ url_for('finanzas_pagos_fundacion') }}" class="boton-secundario">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="boton-accion">
+                    Guardar pago
+                </button>
+            </div>
+
+        </form>
+    </section>
+
+</div>
+{% endblock %}

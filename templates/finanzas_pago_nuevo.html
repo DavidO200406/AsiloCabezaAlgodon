@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block titulo %}Registrar pago familiar | Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+<div class="contenido-principal">
+    <div class="pagina-encabezado">
+        <div>
+            <span class="etiqueta-seccion">GESTIÓN DE COBROS</span>
+            <h2>Registrar pago familiar</h2>
+            <p>Registra el pago correspondiente a la cuota seleccionada.</p>
+        </div>
+
+        <a href="{{ url_for('finanzas_cuotas') }}" class="boton-secundario">
+            Volver a cuotas
+        </a>
+    </div>
+
+    {% with mensajes = get_flashed_messages(with_categories=true) %}
+    {% if mensajes %}
+    {% for categoria, mensaje in mensajes %}
+    <div class="mensaje-alerta mensaje-{{ categoria }}">
+        {{ mensaje }}
+    </div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <section class="seccion-panel formulario-panel">
+        <h3>Información de la cuota</h3>
+
+        <p>
+            <strong>Residente:</strong>
+            {{ cuota.nombres }} {{ cuota.apellidos }}
+        </p>
+
+        <p>
+            <strong>Periodo:</strong>
+            {{ cuota.fecha_inicio.strftime('%d/%m/%Y') }}
+            al
+            {{ cuota.fecha_fin.strftime('%d/%m/%Y') }}
+        </p>
+
+        <p>
+            <strong>Monto de la cuota:</strong>
+            Q {{ "{:,.2f}".format(cuota.monto) }}
+        </p>
+
+        <p>
+            <strong>Total pagado:</strong>
+            Q {{ "{:,.2f}".format(cuota.total_pagado) }}
+        </p>
+
+        <p>
+            <strong>Saldo pendiente:</strong>
+            Q {{ "{:,.2f}".format(cuota.saldo) }}
+        </p>
+
+        {% if cuota.saldo > 0 and familiares %}
+        <hr>
+
+        <form method="POST" class="formulario-datos">
+            <div class="campo-formulario">
+                <label for="id_familiar">Familiar que realiza el pago</label>
+
+                <select id="id_familiar" name="id_familiar" required>
+                    <option value="">Selecciona un familiar</option>
+
+                    {% for familiar in familiares %}
+                    <option value="{{ familiar.id_familiar }}">
+                        {{ familiar.nombres }} {{ familiar.apellidos }}
+                        {% if familiar.responsable_pago %}
+                        (Responsable de pago)
+                        {% endif %}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="campo-formulario">
+                <label for="monto">Monto del pago (Q)</label>
+
+                <input type="number" id="monto" name="monto" min="0.01" max="{{ cuota.saldo }}" step="0.01"
+                    placeholder="Ej. 500.00" required>
+            </div>
+
+            <div class="campo-formulario">
+                <label for="metodo_pago">Método de pago</label>
+
+                <select id="metodo_pago" name="metodo_pago" required>
+                    <option value="">Selecciona un método</option>
+                    <option value="Efectivo">Efectivo</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Tarjeta">Tarjeta</option>
+                    <option value="Depósito">Depósito</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
+            <div class="campo-formulario">
+                <label for="referencia">Referencia (opcional)</label>
+
+                <input type="text" id="referencia" name="referencia" maxlength="100"
+                    placeholder="Número de recibo o transacción">
+            </div>
+
+            <div class="campo-formulario">
+                <label for="observaciones">Observaciones (opcional)</label>
+
+                <textarea id="observaciones" name="observaciones" rows="3"
+                    placeholder="Información adicional del pago"></textarea>
+            </div>
+
+            <div class="acciones-formulario">
+                <a href="{{ url_for('finanzas_cuotas') }}" class="boton-secundario">
+                    Cancelar
+                </a>
+
+                <button type="submit" class="boton-accion">
+                    Guardar pago
+                </button>
+            </div>
+        </form>
+
+        {% elif cuota.saldo <= 0 %} <p>Esta cuota ya está pagada por completo.</p>
+            {% else %}
+            <p>
+                No hay familiares registrados para este residente.
+                Registra primero al familiar correspondiente.
+            </p>
+            {% endif %}
+    </section>
+</div>
+{% endblock %}

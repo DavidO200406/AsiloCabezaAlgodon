@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block titulo %}Donaciones | Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+<div class="contenido-principal">
+
+    <div class="encabezado-pagina">
+        <div>
+            <h1>Donaciones</h1>
+            <p>Consulta y administra las donaciones recibidas por el asilo.</p>
+        </div>
+
+        <div class="acciones-encabezado">
+            <a href="{{ url_for('finanzas_donacion_nueva') }}" class="boton-accion">
+                Registrar donación
+            </a>
+
+            <a href="{{ url_for('finanzas') }}" class="boton-secundario">
+                Volver a Finanzas
+            </a>
+        </div>
+    </div>
+
+    <section class="seccion-panel">
+        <div class="pagina-encabezado">
+            <div>
+                <h3>Total de donaciones registradas</h3>
+                <p>Importe acumulado de los registros disponibles.</p>
+            </div>
+
+            <h2>Q {{ "{:,.2f}".format(total_donaciones) }}</h2>
+        </div>
+    </section>
+
+    <section class="seccion-panel">
+        <h3>Historial de donaciones</h3>
+
+        {% if donaciones %}
+        <div class="tabla-contenedor">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Donante</th>
+                        <th>Tipo</th>
+                        <th>Fecha</th>
+                        <th>Monto</th>
+                        <th>Descripción</th>
+                        <th>Referencia</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for donacion in donaciones %}
+                    <tr>
+                        <td>{{ donacion.id_donacion }}</td>
+                        <td>{{ donacion.nombre_donante }}</td>
+                        <td>{{ donacion.tipo_donante }}</td>
+                        <td>{{ donacion.fecha_donacion.strftime('%d/%m/%Y') }}</td>
+                        <td>Q {{ "{:,.2f}".format(donacion.monto) }}</td>
+                        <td>{{ donacion.descripcion or 'Sin descripción' }}</td>
+                        <td>{{ donacion.referencia or 'Sin referencia' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        {% else %}
+        <p>Aún no hay donaciones registradas.</p>
+        {% endif %}
+    </section>
+
+</div>
+{% endblock %}

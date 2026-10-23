@@ -71,22 +71,83 @@
 
     </div>
 
-    <!-- ACCESO A CUOTAS FAMILIARES -->
-    <section class="seccion-panel finanzas-accesos">
+    <!-- ACCESOS A LOS MÓDULOS FINANCIEROS -->
+    <div class="pagina-encabezado">
         <div>
-            <span class="etiqueta-seccion">GESTIÓN DE COBROS</span>
-            <h3>Cuotas familiares</h3>
+            <span class="etiqueta-seccion">GESTIÓN FINANCIERA</span>
+            <h3>Administración de movimientos</h3>
+            <p>Selecciona el módulo que deseas consultar o administrar.</p>
+        </div>
+    </div>
+
+    <div class="tarjetas-estadisticas finanzas-modulos">
+
+        <!-- CUOTAS FAMILIARES -->
+        <div class="tarjeta-estadistica finanzas-modulo">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Cuotas familiares</span>
+                <span class="finanzas-icono azul">Q</span>
+            </div>
             <p>
                 Consulta las cuotas de los residentes, los pagos recibidos
                 y los saldos pendientes.
             </p>
+            <a href="{{ url_for('finanzas_cuotas') }}" class="boton-accion">
+                Consultar cuotas
+                <span aria-hidden="true">→</span>
+            </a>
         </div>
 
-        <a href="{{ url_for('finanzas_cuotas') }}" class="boton-accion">
-            Consultar cuotas familiares
-            <span aria-hidden="true">→</span>
-        </a>
-    </section>
+        <!-- DONACIONES -->
+        <div class="tarjeta-estadistica finanzas-modulo">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Donaciones</span>
+                <span class="finanzas-icono naranja">+</span>
+            </div>
+            <p>
+                Registra las donaciones recibidas y consulta el historial
+                de aportaciones realizadas al asilo.
+            </p>
+            <a href="{{ url_for('finanzas_donaciones') }}" class="boton-accion">
+                Consultar donaciones
+                <span aria-hidden="true">→</span>
+            </a>
+        </div>
+
+        <!-- GASTOS -->
+        <div class="tarjeta-estadistica finanzas-modulo">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Gastos del asilo</span>
+                <span class="finanzas-icono rojo">−</span>
+            </div>
+            <p>
+                Registra los gastos de alimentación, medicamentos,
+                servicios básicos, mantenimiento y otras categorías.
+            </p>
+            <a href="{{ url_for('finanzas_gastos') }}" class="boton-accion">
+                Consultar gastos
+                <span aria-hidden="true">→</span>
+            </a>
+        </div>
+
+        <!-- PAGOS DE LA FUNDACIÓN -->
+        <div class="tarjeta-estadistica finanzas-modulo">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Pagos de la fundación</span>
+                <span class="finanzas-icono verde">+</span>
+            </div>
+            <p>
+                Consulta los ingresos recibidos de la fundación
+                y registra nuevos pagos para mantener actualizado
+                el balance financiero del asilo.
+            </p>
+            <a href="{{ url_for('finanzas_pagos_fundacion') }}" class="boton-accion">
+                Consultar pagos
+                <span aria-hidden="true">→</span>
+            </a>
+        </div>
+
+    </div>
 
 </div>
 
