@@ -3273,6 +3273,198 @@ def finanzas_gasto_nuevo():
     )
 
 # =========================================================
+# MODULO DE REPORTES FINANCIEROS
+# =========================================================
+
+@app.route("/reportes")
+@requiere_rol("Administrador", "Contador")
+def reportes():
+    conexion = obtener_conexion()
+    cursor = conexion.cursor(dictionary=True)
+
+    hoy = datetime.now().date()
+    primer_dia_mes = hoy.replace(day=1)
+
+    fecha_inicio_texto = request.args.get(
+        "fecha_inicio", primer_dia_mes.isoformat()
+    )
+    fecha_fin_texto = request.args.get(
+        "fecha_fin", hoy.isoformat()
+    )
+
+    error = None
+    movimientos = []
+
+    try:
+        try:
+            fecha_inicio = datetime.strptime(
+                fecha_inicio_texto, "%Y-%m-%d"
+            ).date()
+            fecha_fin = datetime.strptime(
+                fecha_fin_texto, "%Y-%m-%d"
+            ).date()
+
+            if fecha_inicio > fecha_fin:
+                raise ValueError
+
+        except ValueError:
+            error = "Selecciona un periodo válido. La fecha inicial no puede ser posterior a la fecha final."
+            fecha_inicio = primer_dia_mes
+            fecha_fin = hoy
+            fecha_inicio_texto = fecha_inicio.isoformat()
+            fecha_fin_texto = fecha_fin.isoformat()
+
+        if not error:
+            # DONACIONES
+            cursor.execute("""
+                SELECT
+                    fecha_donacion AS fecha,
+                    monto,
+                    CONCAT('Donación: ', nombre_donante) AS concepto,
+                    COALESCE(descripcion, '') AS detalle,
+                    COALESCE(referencia, '') AS referencia
+                FROM donaciones
+                WHERE fecha_donacion BETWEEN %s AND %s
+            """, (fecha_inicio, fecha_fin))
+
+            donaciones = cursor.fetchall()
+
+            # PAGOS FAMILIARES
+            cursor.execute("""
+                SELECT
+                    fecha_pago AS fecha,
+                    monto,
+                    'Pago familiar' AS concepto,
+                    metodo_pago AS detalle,
+                    COALESCE(referencia, '') AS referencia
+                FROM pagos_familiares
+                WHERE DATE(fecha_pago) BETWEEN %s AND %s
+            """, (fecha_inicio, fecha_fin))
+
+            pagos_familiares = cursor.fetchall()
+
+            # PAGOS DE LA FUNDACION
+            cursor.execute("""
+                SELECT
+                    fecha_pago AS fecha,
+                    monto,
+                    concepto,
+                    COALESCE(observaciones, '') AS detalle,
+                    COALESCE(referencia, '') AS referencia
+                FROM pagos_fundacion
+                WHERE DATE(fecha_pago) BETWEEN %s AND %s
+            """, (fecha_inicio, fecha_fin))
+
+            pagos_fundacion = cursor.fetchall()
+
+            # GASTOS
+            cursor.execute("""
+                SELECT
+                    fecha_gasto AS fecha,
+                    monto,
+                    CONCAT('Gasto: ', categoria) AS concepto,
+                    CONCAT(
+                        descripcion,
+                        CASE
+                            WHEN proveedor IS NOT NULL
+                                AND proveedor <> ''
+                            THEN CONCAT(' - Proveedor: ', proveedor)
+                            ELSE ''
+                        END
+                    ) AS detalle,
+                    COALESCE(referencia, '') AS referencia
+                FROM gastos
+                WHERE fecha_gasto BETWEEN %s AND %s
+            """, (fecha_inicio, fecha_fin))
+
+            gastos = cursor.fetchall()
+
+            # CALCULAR LOS TOTALES DEL PERIODO
+            from decimal import Decimal
+
+            total_donaciones = sum(
+                (p["monto"] for p in donaciones),
+                Decimal("0.00")
+            )
+
+            total_pagos_familiares = sum(
+                (p["monto"] for p in pagos_familiares),
+                Decimal("0.00")
+            )
+
+            total_pagos_fundacion = sum(
+                (p["monto"] for p in pagos_fundacion),
+                Decimal("0.00")
+            )
+
+            total_gastos = sum(
+                (p["monto"] for p in gastos),
+                Decimal("0.00")
+            )
+
+            total_ingresos = (
+                total_donaciones
+                + total_pagos_familiares
+                + total_pagos_fundacion
+            )
+
+            balance = total_ingresos - total_gastos
+
+            # UNIFICAR LOS MOVIMIENTOS PARA MOSTRARLOS EN UNA TABLA
+            for tipo, registros in [
+                ("Donación", donaciones),
+                ("Pago familiar", pagos_familiares),
+                ("Pago de la fundación", pagos_fundacion),
+                ("Gasto", gastos)
+            ]:
+                for registro in registros:
+                    fecha = registro["fecha"]
+
+                    if isinstance(fecha, datetime):
+                        fecha = fecha.date()
+
+                    movimientos.append({
+                        "fecha": fecha,
+                        "tipo": tipo,
+                        "concepto": registro["concepto"],
+                        "detalle": registro["detalle"],
+                        "referencia": registro["referencia"],
+                        "monto": registro["monto"],
+                        "es_gasto": tipo == "Gasto"
+                    })
+
+            movimientos.sort(
+                key=lambda movimiento: movimiento["fecha"],
+                reverse=True
+            )
+
+        else:
+            total_donaciones = Decimal("0.00")
+            total_pagos_familiares = Decimal("0.00")
+            total_pagos_fundacion = Decimal("0.00")
+            total_gastos = Decimal("0.00")
+            total_ingresos = Decimal("0.00")
+            balance = Decimal("0.00")
+
+        return render_template(
+            "reportes.html",
+            fecha_inicio=fecha_inicio_texto,
+            fecha_fin=fecha_fin_texto,
+            error=error,
+            movimientos=movimientos,
+            total_donaciones=total_donaciones,
+            total_pagos_familiares=total_pagos_familiares,
+            total_pagos_fundacion=total_pagos_fundacion,
+            total_ingresos=total_ingresos,
+            total_gastos=total_gastos,
+            balance=balance
+        )
+
+    finally:
+        cursor.close()
+        conexion.close()
+
+# =========================================================
 # CERRAR SESIÓN
 # =========================================================
 

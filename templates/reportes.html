@@ -1,0 +1,205 @@
+{% extends "base.html" %}
+
+{% block titulo %}Reportes Financieros | Asilo Cabeza de Algodón{% endblock %}
+
+{% block contenido %}
+
+<div class="contenido-principal finanzas-pagina">
+
+    <div class="pagina-encabezado">
+        <div>
+            <span class="etiqueta-seccion">ADMINISTRACIÓN</span>
+            <h2>Reportes financieros</h2>
+            <p>Consulta los ingresos y gastos del asilo en un periodo determinado.</p>
+        </div>
+
+        <a href="{{ url_for('finanzas') }}" class="boton-secundario">
+            Volver a Finanzas
+        </a>
+    </div>
+
+    <!-- FILTRO POR FECHAS -->
+    <section class="seccion-tabla">
+        <div class="seccion-tabla-encabezado">
+            <div>
+                <h3>Periodo del reporte</h3>
+                <p>Selecciona las fechas que deseas consultar.</p>
+            </div>
+        </div>
+
+        <form method="GET" action="{{ url_for('reportes') }}" class="formulario-principal">
+
+            <div class="formulario-grid">
+
+                <div class="campo-formulario">
+                    <label for="fecha_inicio">Fecha inicial</label>
+                    <input type="date" id="fecha_inicio" name="fecha_inicio" value="{{ fecha_inicio }}" required>
+                </div>
+
+                <div class="campo-formulario">
+                    <label for="fecha_fin">Fecha final</label>
+                    <input type="date" id="fecha_fin" name="fecha_fin" value="{{ fecha_fin }}" required>
+                </div>
+
+            </div>
+
+            <div class="formulario-acciones">
+                <button type="submit" class="boton-accion">
+                    Generar reporte
+                </button>
+            </div>
+        </form>
+    </section>
+
+    {% if error %}
+    <div class="mensaje-error" role="alert">
+        {{ error }}
+    </div>
+    {% endif %}
+
+    <!-- RESUMEN DEL PERIODO -->
+    <div class="pagina-encabezado">
+        <div>
+            <span class="etiqueta-seccion">RESULTADOS</span>
+            <h3>Resumen financiero</h3>
+            <p>
+                Del {{ fecha_inicio }} al {{ fecha_fin }}
+            </p>
+        </div>
+    </div>
+
+    <div class="tarjetas-estadisticas finanzas-estadisticas">
+
+        <div class="tarjeta-estadistica">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Ingresos totales</span>
+                <span class="finanzas-icono verde">+</span>
+            </div>
+            <p class="valor-estadistica">
+                Q {{ "{:,.2f}".format(total_ingresos) }}
+            </p>
+            <span class="finanzas-descripcion">
+                Donaciones y pagos recibidos
+            </span>
+        </div>
+
+        <div class="tarjeta-estadistica">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Gastos totales</span>
+                <span class="finanzas-icono rojo">−</span>
+            </div>
+            <p class="valor-estadistica">
+                Q {{ "{:,.2f}".format(total_gastos) }}
+            </p>
+            <span class="finanzas-descripcion">
+                Gastos registrados en el periodo
+            </span>
+        </div>
+
+        <div class="tarjeta-estadistica">
+            <div class="finanzas-tarjeta-encabezado">
+                <span>Balance del periodo</span>
+                <span class="finanzas-icono azul">Q</span>
+            </div>
+            <p class="valor-estadistica">
+                Q {{ "{:,.2f}".format(balance) }}
+            </p>
+            <span class="finanzas-descripcion">
+                Ingresos menos gastos
+            </span>
+        </div>
+
+    </div>
+
+    <!-- DESGLOSE DE INGRESOS -->
+    <section class="seccion-tabla">
+        <div class="seccion-tabla-encabezado">
+            <div>
+                <h3>Desglose de ingresos</h3>
+                <p>Montos recibidos por cada concepto.</p>
+            </div>
+        </div>
+
+        <div class="tabla-contenedor">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>Tipo de ingreso</th>
+                        <th>Monto total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Donaciones</td>
+                        <td>Q {{ "{:,.2f}".format(total_donaciones) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pagos familiares</td>
+                        <td>Q {{ "{:,.2f}".format(total_pagos_familiares) }}</td>
+                    </tr>
+                    <tr>
+                        <td>Pagos de la fundación</td>
+                        <td>Q {{ "{:,.2f}".format(total_pagos_fundacion) }}</td>
+                    </tr>
+                    <tr>
+                        <th>Total de ingresos</th>
+                        <th>Q {{ "{:,.2f}".format(total_ingresos) }}</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+    <!-- DETALLE DE MOVIMIENTOS -->
+    <section class="seccion-tabla">
+        <div class="seccion-tabla-encabezado">
+            <div>
+                <h3>Detalle de movimientos</h3>
+                <p>Movimientos registrados dentro del periodo seleccionado.</p>
+            </div>
+        </div>
+
+        <div class="tabla-contenedor">
+            <table class="tabla-datos">
+                <thead>
+                    <tr>
+                        <th>Fecha</th>
+                        <th>Tipo</th>
+                        <th>Concepto</th>
+                        <th>Detalle</th>
+                        <th>Referencia</th>
+                        <th>Monto</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    {% for movimiento in movimientos %}
+                    <tr>
+                        <td>{{ movimiento.fecha.strftime('%d/%m/%Y') }}</td>
+                        <td>{{ movimiento.tipo }}</td>
+                        <td>{{ movimiento.concepto }}</td>
+                        <td>{{ movimiento.detalle or 'Sin detalle' }}</td>
+                        <td>{{ movimiento.referencia or 'Sin referencia' }}</td>
+                        <td>
+                            {% if movimiento.es_gasto %}
+                            − Q {{ "{:,.2f}".format(movimiento.monto) }}
+                            {% else %}
+                            Q {{ "{:,.2f}".format(movimiento.monto) }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="6">
+                            No hay movimientos registrados en el periodo seleccionado.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </section>
+
+</div>
+
+{% endblock %}

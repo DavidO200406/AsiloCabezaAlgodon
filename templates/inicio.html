@@ -126,12 +126,14 @@ Panel principal - Asilo Cabeza de Algodón
         <span class="card-link">Abrir módulo →</span>
     </a>
 
-    <div class="dashboard-card card-pendiente">
+
+    <a href="{{ url_for('reportes') }}" class="dashboard-card">
         <div class="card-icon verde">▥</div>
         <h4>Reportes</h4>
-        <p>Consulta de información administrativa y médica.</p>
-        <span class="card-link">Próximamente</span>
-    </div>
+        <p>Consulta los ingresos, gastos, balance y movimientos financieros por periodo.</p>
+        <span class="card-link">Abrir módulo →</span>
+    </a>
+
 
     {% endif %}
 

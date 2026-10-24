@@ -125,11 +125,12 @@
                     <span>Facturación y Finanzas</span>
                 </a>
 
-                <div class="sidebar-link deshabilitado">
+                <a href="{{ url_for('reportes') }}"
+                    class="sidebar-link {% if request.endpoint == 'reportes' %}activo{% endif %}">
                     <span class="menu-icon">▥</span>
                     <span>Reportes</span>
-                    <small>Próximamente</small>
-                </div>
+                </a>
+
             </div>
             {% endif %}
 
