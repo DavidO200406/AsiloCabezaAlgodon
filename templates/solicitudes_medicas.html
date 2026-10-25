@@ -91,14 +91,14 @@ Solicitudes médicas - Asilo Cabeza de Algodón
                     </option>
 
                     {% for medico in medicos %}
-
                     <option value="{{ medico.id_medico }}">
-
-                        {{ medico.apellidos }},
-                        {{ medico.nombres }}
-
+                        {{ medico.apellidos }}, {{ medico.nombres }}
+                        {% if medico.especialidad %}
+                        - {{ medico.especialidad }}
+                        {% else %}
+                        - Sin especialidad registrada
+                        {% endif %}
                     </option>
-
                     {% endfor %}
 
                 </select>
@@ -300,7 +300,6 @@ Solicitudes médicas - Asilo Cabeza de Algodón
                         {{ solicitud.motivo }}
 
                     </td>
-
 
                     <td>
 

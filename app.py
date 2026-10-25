@@ -923,11 +923,14 @@ def solicitudes_medicas():
     cursor.execute(
         """
         SELECT
-            id_medico,
-            nombres,
-            apellidos
-        FROM medicos
-        ORDER BY apellidos, nombres
+            m.id_medico,
+            m.nombres,
+            m.apellidos,
+            e.nombre AS especialidad
+        FROM medicos m
+        LEFT JOIN especialidades e
+            ON m.id_especialidad = e.id_especialidad
+        ORDER BY m.apellidos, m.nombres
         """
     )
 
@@ -1370,20 +1373,26 @@ def citas_medicas():
         # OBTENER SOLICITUDES MÉDICAS
         # -------------------------------------------------
 
-        cursor.execute(
-            """
+        cursor.execute("""
             SELECT
                 s.id_solicitud,
+                s.id_medico_solicitado,
                 s.motivo,
                 s.estado,
                 i.nombres AS residente_nombres,
-                i.apellidos AS residente_apellidos
+                i.apellidos AS residente_apellidos,
+                m.nombres AS medico_nombres,
+                m.apellidos AS medico_apellidos,
+                e.nombre AS especialidad
             FROM solicitudes_medicas s
             INNER JOIN internos i
                 ON s.id_interno = i.id_interno
+            LEFT JOIN medicos m
+                ON s.id_medico_solicitado = m.id_medico
+            LEFT JOIN especialidades e
+                ON m.id_especialidad = e.id_especialidad
             ORDER BY s.fecha_solicitud DESC
-            """
-        )
+        """)
 
         solicitudes = cursor.fetchall()
 
@@ -1391,17 +1400,18 @@ def citas_medicas():
         # OBTENER MÉDICOS ACTIVOS
         # -------------------------------------------------
 
-        cursor.execute(
-            """
+        cursor.execute("""
             SELECT
-                id_medico,
-                nombres,
-                apellidos
-            FROM medicos
-            WHERE estado = 1
-            ORDER BY apellidos, nombres
-            """
-        )
+                m.id_medico,
+                m.nombres,
+                m.apellidos,
+                e.nombre AS especialidad
+            FROM medicos m
+            LEFT JOIN especialidades e
+                ON m.id_especialidad = e.id_especialidad
+            WHERE m.estado = 1
+            ORDER BY m.apellidos, m.nombres
+        """)
 
         medicos = cursor.fetchall()
 

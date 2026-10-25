@@ -26,10 +26,13 @@ Citas médicas - Asilo Cabeza de Algodón
 
             <div class="detalle-campo">
                 <label for="id_solicitud">Solicitud médica</label>
+
                 <select id="id_solicitud" name="id_solicitud" required>
                     <option value="">Selecciona una solicitud</option>
+
                     {% for solicitud in solicitudes %}
-                    <option value="{{ solicitud.id_solicitud }}">
+                    <option value="{{ solicitud.id_solicitud }}"
+                        data-medico="{{ solicitud.id_medico_solicitado or '' }}">
                         #{{ solicitud.id_solicitud }} -
                         {{ solicitud.residente_nombres }}
                         {{ solicitud.residente_apellidos }}
@@ -41,14 +44,25 @@ Citas médicas - Asilo Cabeza de Algodón
 
             <div class="detalle-campo">
                 <label for="id_medico">Médico responsable</label>
+
                 <select id="id_medico" name="id_medico" required>
-                    <option value="">Selecciona un médico</option>
+                    <option value="">Selecciona primero una solicitud</option>
+
                     {% for medico in medicos %}
                     <option value="{{ medico.id_medico }}">
                         {{ medico.apellidos }}, {{ medico.nombres }}
+                        {% if medico.especialidad %}
+                        - {{ medico.especialidad }}
+                        {% else %}
+                        - Sin especialidad registrada
+                        {% endif %}
                     </option>
                     {% endfor %}
                 </select>
+
+                <small id="mensaje-medico">
+                    El médico se seleccionará según la solicitud médica.
+                </small>
             </div>
 
             <div class="detalle-campo">
@@ -143,5 +157,48 @@ Citas médicas - Asilo Cabeza de Algodón
         </tbody>
     </table>
 </div>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const solicitudSelect = document.getElementById("id_solicitud");
+        const medicoSelect = document.getElementById("id_medico");
+        const mensajeMedico = document.getElementById("mensaje-medico");
 
+        function actualizarMedico() {
+            const opcion = solicitudSelect.options[
+                solicitudSelect.selectedIndex
+            ];
+
+            const idMedico = opcion
+                ? opcion.dataset.medico
+                : "";
+
+            medicoSelect.value = "";
+
+            if (!idMedico) {
+                mensajeMedico.textContent =
+                    "Esta solicitud no tiene un médico asignado.";
+                return;
+            }
+
+            const medicoDisponible = Array.from(
+                medicoSelect.options
+            ).some(function (opcionMedico) {
+                return opcionMedico.value === idMedico;
+            });
+
+            if (medicoDisponible) {
+                medicoSelect.value = idMedico;
+                mensajeMedico.textContent =
+                    "Se seleccionó el médico asignado a esta solicitud.";
+            } else {
+                mensajeMedico.textContent =
+                    "El médico solicitado no está activo o disponible. " +
+                    "Revisa la asignación de la solicitud.";
+            }
+        }
+
+        solicitudSelect.addEventListener("change", actualizarMedico);
+        actualizarMedico();
+    });
+</script>
 {% endblock %}
