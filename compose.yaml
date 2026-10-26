@@ -1,0 +1,47 @@
+
+services:
+  web:
+    build: .
+    container_name: asilo_web
+    ports:
+      - "5000:5000"
+    env_file:
+      - .env
+      - .env.docker
+    environment:
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${MYSQL_APP_USER}
+      DB_PASSWORD: ${MYSQL_APP_PASSWORD}
+      DB_NAME: ${DB_NAME}
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
+  db:
+    image: mysql:8.0
+    container_name: asilo_db
+    env_file:
+      - .env
+      - .env.docker
+    environment:
+      MYSQL_DATABASE: ${DB_NAME}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?Define MYSQL_ROOT_PASSWORD en .env.docker}
+      MYSQL_USER: ${MYSQL_APP_USER:?Define MYSQL_APP_USER en .env.docker}
+      MYSQL_PASSWORD: ${MYSQL_APP_PASSWORD:?Define MYSQL_APP_PASSWORD en .env.docker}
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./respaldo/asilocabezaalgodon.sql:/docker-entrypoint-initdb.d/respaldo.sql:ro
+      - ./docker-init/zz-permissions.sql:/docker-entrypoint-initdb.d/zz-permissions.sql:ro
+    ports:
+      - "3307:3306"
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h localhost -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
